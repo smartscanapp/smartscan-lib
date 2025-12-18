@@ -42,20 +42,6 @@ def embed_text_files(paths: list[str], embedder: TextEmbeddingProvider, max_toke
     return np.stack([embed_text_file(path, embedder, max_tokenizer_length, max_chunks) for path in paths], axis=0)
 
 
-def few_shot_classification(item_embedding:  np.ndarray, class_prototypes: list[tuple[str, np.ndarray]]) -> tuple[str, float]:
-        class_similarities_dict: dict[str, float] = {}
-
-        for class_id, prototype_embedding in class_prototypes:
-            try:
-                similarity = np.dot(item_embedding, prototype_embedding)
-            except Exception as e:
-                continue
-            class_similarities_dict[class_id] = similarity
-
-        class_similarities = sorted(class_similarities_dict.items(), key=lambda x: x[1], reverse=True)        
-        return class_similarities[0]
-
-
 def chunk_text(s: str, tokenizer_max_length: int, limit: int = 10):
     max_chunks = len(s) // 4 * tokenizer_max_length
     n_chunks = min(limit, max_chunks)
