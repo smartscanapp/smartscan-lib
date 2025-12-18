@@ -22,9 +22,6 @@ class FileIndexer(BatchProcessor[str, tuple[str, np.ndarray]]):
         self.text_encoder = text_encoder
         self.n_frames = n_frames
         self.n_chunks = n_chunks
-        self.valid_img_exts = ('.png', '.jpg', '.jpeg', '.bmp', '.webp')
-        self.valid_txt_exts = ('.txt', '.md', '.rst', '.html', '.json')
-        self.valid_vid_exts = ('.mp4', '.mkv', '.webm')
 
     def on_process(self, item):
             file_embedding = self._embed_file(item)
@@ -36,9 +33,9 @@ class FileIndexer(BatchProcessor[str, tuple[str, np.ndarray]]):
 
 
     def _embed_file(self, path: str) -> np.ndarray:
-        is_image_file = are_valid_files(self.valid_img_exts, [path])
-        is_text_file = are_valid_files(self.valid_txt_exts, [path])
-        is_video_file = are_valid_files(self.valid_vid_exts, [path])
+        is_image_file = are_valid_files(SupportedFileTypes.IMAGE, [path])
+        is_text_file = are_valid_files(SupportedFileTypes.TEXT, [path])
+        is_video_file = are_valid_files(SupportedFileTypes.VIDEO, [path])
 
         if is_text_file:
             return embed_text_file(path, self.text_encoder, 128, self.n_chunks)
