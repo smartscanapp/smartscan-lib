@@ -6,7 +6,8 @@ from smartscan.embeddings import embed_image_file, embed_text_file, embed_video_
 from smartscan.utils import are_valid_files
 from smartscan.errors import SmartScanError, ErrorCode
 from smartscan.constants import SupportedFileTypes
-from smartscan.classification import ClassificationResult, ClassPrototype, ClassificationInput, few_shot_classification
+from smartscan.classification.types import ClassificationResult, ClassPrototype, ClassificationInput
+from smartscan.classification.few_shot import few_shot_classification
 
 
 class FileClassifier(BatchProcessor[str, ClassificationResult]):
