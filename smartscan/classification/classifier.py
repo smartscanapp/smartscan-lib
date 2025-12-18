@@ -32,13 +32,13 @@ class FileClassifier(BatchProcessor[str, ClassificationResult]):
         return few_shot_classification(ClassificationInput(item_id=item, embedding=file_embedding), self.class_prototypes)
     
     async def on_batch_complete(self, batch):
-        self.listener.on_batch_complete(batch)
+        await self.listener.on_batch_complete(batch)
 
     
     def _embed_file(self, path: str) -> np.ndarray:
-        is_image_file = are_valid_files(self.valid_img_exts, [path])
-        is_text_file = are_valid_files(self.valid_txt_exts, [path])
-        is_video_file = are_valid_files(self.valid_vid_exts, [path])
+        is_image_file = are_valid_files(SupportedFileTypes.IMAGE,  [path])
+        is_text_file = are_valid_files(SupportedFileTypes.TEXT, [path])
+        is_video_file = are_valid_files(SupportedFileTypes.VIDEO, [path])
 
         if is_text_file:
             return embed_text_file(path, self.text_encoder, 128, self.n_chunks)
