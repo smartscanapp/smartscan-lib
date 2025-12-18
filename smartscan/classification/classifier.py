@@ -1,28 +1,21 @@
 import numpy as np
-from dataclasses import dataclass
 
 from smartscan.processor import BatchProcessor, ProcessorListener
 from smartscan.providers import ImageEmbeddingProvider, TextEmbeddingProvider
-from smartscan.embeddings import few_shot_classification, embed_image_file, embed_text_file, embed_video_file
+from smartscan.embeddings import embed_image_file, embed_text_file, embed_video_file
 from smartscan.utils import are_valid_files
 from smartscan.errors import SmartScanError, ErrorCode
 from smartscan.constants import SupportedFileTypes
-
-
-@dataclass
-class ClassificationResult:
-    item: str
-    class_id: str
-    similarity: float
+from smartscan.classification.types import ClassificationResult, ClassPrototype, ClassificationInput
+from smartscan.classification.few_shot import few_shot_classification
 
 
 class FileClassifier(BatchProcessor[str, ClassificationResult]):
     def __init__(self, 
                 image_encoder: ImageEmbeddingProvider, 
                 text_encoder: TextEmbeddingProvider,                 
-                class_prototypes: list[tuple[str, np.ndarray]],
+                class_prototypes: list[ClassPrototype],
                 listener: ProcessorListener[str, ClassificationResult],
-                similarity_threshold: float,
                 n_frames_limit = 10,
                 n_chunks_limit = 5,
                 **kwargs
@@ -31,28 +24,21 @@ class FileClassifier(BatchProcessor[str, ClassificationResult]):
         self.image_encoder = image_encoder
         self.text_encoder = text_encoder        
         self.class_prototypes = class_prototypes
-        self.similarity_threshold = similarity_threshold
         self.n_frames = n_frames_limit
         self.n_chunks = n_chunks_limit
 
-    def on_process(self, item):
+    def on_process(self, item: str) -> ClassificationResult:
         file_embedding = self._embed_file(item)
-        destination_dir, best_similarity = few_shot_classification(file_embedding, self.class_prototypes)
-        
-        if best_similarity <= self.similarity_threshold:
-            raise SmartScanError("Item unclassified", ErrorCode.BELOW_SIMILARITY_THRESHOLD)
-
-        return ClassificationResult(item, destination_dir, best_similarity)
-    
+        return few_shot_classification(ClassificationInput(item_id=item, embedding=file_embedding), self.class_prototypes)
     
     async def on_batch_complete(self, batch):
-        self.listener.on_batch_complete(batch)
+        await self.listener.on_batch_complete(batch)
 
     
     def _embed_file(self, path: str) -> np.ndarray:
-        is_image_file = are_valid_files(self.valid_img_exts, [path])
-        is_text_file = are_valid_files(self.valid_txt_exts, [path])
-        is_video_file = are_valid_files(self.valid_vid_exts, [path])
+        is_image_file = are_valid_files(SupportedFileTypes.IMAGE,  [path])
+        is_text_file = are_valid_files(SupportedFileTypes.TEXT, [path])
+        is_video_file = are_valid_files(SupportedFileTypes.VIDEO, [path])
 
         if is_text_file:
             return embed_text_file(path, self.text_encoder, 128, self.n_chunks)
