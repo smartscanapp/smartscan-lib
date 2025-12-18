@@ -14,7 +14,7 @@ def few_shot_classification(item: ClassificationInput, class_prototypes: list[Cl
                 label = class_prototype.class_id
                 best_sim = similarity
 
-        return ClassificationResult(item_id=item.id, label=label, similarity=best_sim)
+        return ClassificationResult(item_id=item.item_id, label=label, similarity=float(best_sim))
 
 
 def calculate_cohesion_score(prototype: np.ndarray, class_sample_batch: np.ndarray) -> float:
