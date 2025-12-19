@@ -1,25 +1,26 @@
 import numpy as np
-from smartscan.classification.types import ClassPrototype, ClassificationResult, ClassificationInput
+from smartscan.classification.types import ClassPrototype, ClassificationResult
 from smartscan.processor import BatchProcessor, ProcessorListener
-from smartscan.classification.types import ClassificationResult, ClassPrototype, ClassificationInput
+from smartscan.classification.types import ClassificationResult, ClassPrototype
+from smartscan.types import ItemEmbedding
 
-class FewShotClassifier(BatchProcessor[ClassificationInput, ClassificationResult]):
+class FewShotClassifier(BatchProcessor[ItemEmbedding, ClassificationResult]):
     def __init__(self, 
                 class_prototypes: list[ClassPrototype],
-                listener: ProcessorListener[ClassificationInput, ClassificationResult],
+                listener: ProcessorListener[ItemEmbedding, ClassificationResult],
                 **kwargs
                 ):
         super().__init__(listener=listener, **kwargs)
         self.class_prototypes = class_prototypes
 
-    def on_process(self, item: ClassificationInput) -> ClassificationResult:
+    def on_process(self, item: ItemEmbedding) -> ClassificationResult:
         return few_shot_classify(item, self.class_prototypes)
     
     async def on_batch_complete(self, batch):
         await self.listener.on_batch_complete(batch)
 
 
-def few_shot_classify(item: ClassificationInput, class_prototypes: list[ClassPrototype]) -> ClassificationResult:
+def few_shot_classify(item: ItemEmbedding, class_prototypes: list[ClassPrototype]) -> ClassificationResult:
         label = None
         best_sim = 0.0
         
