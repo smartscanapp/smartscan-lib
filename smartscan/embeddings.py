@@ -12,6 +12,15 @@ def generate_prototype_embedding(embeddings: np.ndarray) -> np.ndarray:
     prototype /= np.linalg.norm(prototype)
     return prototype
 
+def update_prototype_embedding(current_prototype: np.ndarray, new_embeddings: np.ndarray, current_n: int) -> np.ndarray:
+    new_embeddings = np.asarray(new_embeddings)
+    if new_embeddings.ndim == 1:
+        new_embeddings = new_embeddings[np.newaxis, :]
+    batch_sum = np.sum(new_embeddings, axis=0)
+    updated_n = current_n + new_embeddings.shape[0]
+    updated_prototype = (current_prototype * current_n + batch_sum) / updated_n
+    updated_prototype /= np.linalg.norm(updated_prototype)
+    return updated_prototype
 
 def embed_video_file(path: str, n_frames: int, embedder: ImageEmbeddingProvider):
     frame_arrs = get_frames_from_video(path, n_frames)
