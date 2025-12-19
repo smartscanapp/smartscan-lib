@@ -1,6 +1,15 @@
+from numpy import ndarray
 from typing import Literal, TypeVar
+from dataclasses import dataclass
+
+@dataclass
+class ItemEmbedding:
+    item_id: str
+    embedding: ndarray
+
 
 EncoderType = Literal["image_encoder", "text_encoder", "face_encoder"]
+
 ModelName = Literal[
     "clip-vit-b-32-image",
     "clip-vit-b-32-text",
