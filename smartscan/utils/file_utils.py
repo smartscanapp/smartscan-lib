@@ -5,6 +5,7 @@ import subprocess
 import re
 from pathlib import Path
 from smartscan.errors import SmartScanError, ErrorCode
+from numpy.typing import NDArray
 
 def read_text_file(filepath: str):
     with open(filepath, 'r', encoding='utf-8') as file:
@@ -76,7 +77,7 @@ def get_child_dirs(dirs: list[str], dir_skip_patterns: list[str] = []) -> list[s
     return paths
 
 
-def get_frames_from_video(video_path: str, n_frames: int):
+def get_frames_from_video(video_path: str, n_frames: int) -> NDArray[np.uint8]:
     """
     Extract `n` evenly spaced frames from a video using one FFmpeg process.
     Returns a list of frames as NumPy arrays (H, W, 3, dtype=uint8) at original resolution.
@@ -123,7 +124,7 @@ def get_frames_from_video(video_path: str, n_frames: int):
 
     proc.stdout.close()
     proc.wait()
-    return frames
+    return np.stack(frames, axis=0)
 
 
 def are_valid_files(allowed_exts: list[str], files: list[str]) -> bool:
