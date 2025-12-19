@@ -1,20 +1,20 @@
-import numpy as np
-
+from numpy import ndarray
 from smartscan.processor import BatchProcessor, ProcessorListener
 from smartscan.utils import are_valid_files
 from smartscan.embeddings import embed_video_file, embed_text_file, embed_image_file
 from smartscan.providers import ImageEmbeddingProvider, TextEmbeddingProvider
 from smartscan.errors import SmartScanError, ErrorCode
 from smartscan.constants import SupportedFileTypes
+from smartscan.types import ItemEmbedding
 
 
-class FileIndexer(BatchProcessor[str, tuple[str, np.ndarray]]):
+class FileIndexer(BatchProcessor[str, ItemEmbedding]):
     def __init__(self, 
                 image_encoder: ImageEmbeddingProvider, 
                 text_encoder: TextEmbeddingProvider,
                 n_frames: int = 10,
                 n_chunks: int = 5,
-                listener = ProcessorListener[str, tuple[str, np.ndarray]],
+                listener = ProcessorListener[str, ItemEmbedding],
                 **kwargs
                 ):
         super().__init__(listener=listener, **kwargs)
@@ -25,14 +25,14 @@ class FileIndexer(BatchProcessor[str, tuple[str, np.ndarray]]):
 
     def on_process(self, item):
             file_embedding = self._embed_file(item)
-            return item, file_embedding
+            return ItemEmbedding(item, file_embedding)
              
     # delegate to lister e.g to handle storage
     async def on_batch_complete(self, batch):
         await self.listener.on_batch_complete(batch)
 
 
-    def _embed_file(self, path: str) -> np.ndarray:
+    def _embed_file(self, path: str) -> ndarray:
         is_image_file = are_valid_files(SupportedFileTypes.IMAGE, [path])
         is_text_file = are_valid_files(SupportedFileTypes.TEXT, [path])
         is_video_file = are_valid_files(SupportedFileTypes.VIDEO, [path])
