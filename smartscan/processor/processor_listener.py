@@ -8,7 +8,7 @@ class ProcessorListener(ABC, Generic[Input, Output]):
     async def on_active(self):
         pass
     # made async with asyncio.to_thread
-    def on_progress(self, progress: float):
+    async def on_progress(self, progress: float):
         pass
     async def on_complete(self, result: MetricsSuccess):
         pass
