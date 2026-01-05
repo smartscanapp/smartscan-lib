@@ -56,6 +56,8 @@ class DocIndexer(BatchProcessor[str, list[ItemEmbedding]]):
         self.max_chunks = max_chunks
         self.tokenizer_max_length = tokenizer_max_length
 
+    # All chunks share the same item_id (url or file) so that chunks are group
+    # In the on_batch_complete method, the listener can handle use it as metaddata and assign unique ids to each chunk if required
     def on_process(self, item):
         chunk_embeddings = embed_text(self.text_encoder, item, self.tokenizer_max_length, self.max_chunks)
         return [ItemEmbedding(item, embedding) for embedding in chunk_embeddings]
