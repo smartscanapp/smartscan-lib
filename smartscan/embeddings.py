@@ -1,7 +1,7 @@
 
 import numpy as np
 import pickle
-from smartscan.utils import  video_source_to_pil_images, image_source_to_pil_image
+from smartscan.utils import  video_source_to_pil_images, image_source_to_pil_image, doc_source_to_text_chunks
 from smartscan.providers import ImageEmbeddingProvider, TextEmbeddingProvider
 from smartscan.types import VideoSource, ImageSource
 
@@ -23,29 +23,20 @@ def update_prototype_embedding(current_prototype: np.ndarray, new_embeddings: np
     return updated_prototype
 
 def embed_video(embedder: ImageEmbeddingProvider, source: VideoSource, n_frames: int):
+    """Embed video from url or file"""
     batch = embedder.embed_batch(video_source_to_pil_images(source, n_frames))
     return generate_prototype_embedding(batch)
 
-
-def embed_videos(embedder: ImageEmbeddingProvider, sources: list[VideoSource], n_frames: int):
-    return np.stack([embed_video(embedder, source, n_frames) for source in sources], axis=0)
-
-
-def embed_image(embedder: ImageEmbeddingProvider, source: ImageSource,):
+def embed_image(embedder: ImageEmbeddingProvider, source: ImageSource):
+    """Embed image from url or file"""
     return embedder.embed(image_source_to_pil_image(source))
 
-
-def embed_images(embedder: ImageEmbeddingProvider, sources: list[ImageSource],):
-    return embedder.embed_batch([image_source_to_pil_image(source) for source in sources])
-
-
-def embed_text(embedder: TextEmbeddingProvider, text: str):
-    return embedder.embed(text)
-
-
-def embed_texts(embedder: TextEmbeddingProvider, texts: list[str], ):
-    return embedder.embed_batch(texts)
-
+def embed_text(embedder: TextEmbeddingProvider, source: str, tokenizer_max_length: int = 128, max_chunks: int | None = None ):
+    """Embed doc from url or file.
+    Returns ndarray with shape (batch, dim)
+    """
+    chunks = doc_source_to_text_chunks(source, tokenizer_max_length, max_chunks)
+    return embedder.embed_batch(chunks)
 
 def save_embedding(filepath: str, embedding: np.ndarray):
     """Saves embedding to a file."""
