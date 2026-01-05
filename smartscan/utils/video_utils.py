@@ -110,13 +110,13 @@ def _get_frames_from_short_video(source: str, n_frames: int, width: int, height:
 
 def video_source_to_pil_images(source: VideoSource, n_frames: int = 10, short_video_duration: float = 60.0):
     if isinstance(source, str):
-        if source.startswith(("http", "https")):
+        if source.startswith(("http://", "https://")):
            frame_arrs = get_frames_from_video(source, n_frames, short_video_duration)
            return [Image.fromarray(frame) for frame in frame_arrs]
         elif source.endswith(SupportedFileTypes.VIDEO):
             frame_arrs = get_frames_from_video(source, n_frames, short_video_duration)
             return [Image.fromarray(frame) for frame in frame_arrs]       
         else:
-            raise SmartScanError("Unsupported file type", code=ErrorCode.UNSUPPORTED_FILE_TYPE, details=f"Supported file types: {SupportedFileTypes.IMAGE + SupportedFileTypes.TEXT + SupportedFileTypes.VIDEO}")
+            raise SmartScanError("Unsupported file type", code=ErrorCode.UNSUPPORTED_FILE_TYPE, details=f"Supported file types: {SupportedFileTypes.VIDEO}")
     else:
         return [Image.fromarray(frame_arr) for frame_arr in source]

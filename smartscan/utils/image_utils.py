@@ -94,11 +94,11 @@ def crop_faces(image: Image.Image, boxes: np.ndarray, scores: np.ndarray, conf_t
 
 def image_source_to_pil_image(source: ImageSource) -> Image.Image:
     if isinstance(source, str):
-        if source.startswith(("http", "https")):
+        if source.startswith(("http://", "https://")):
             return Image.open(requests.get(url=source, stream = True).raw)
         elif source.endswith(SupportedFileTypes.IMAGE):
             return Image.open(source)
         else:
-            raise SmartScanError("Unsupported file type", code=ErrorCode.UNSUPPORTED_FILE_TYPE, details=f"Supported file types: {SupportedFileTypes.IMAGE + SupportedFileTypes.TEXT + SupportedFileTypes.VIDEO}")
+            raise SmartScanError("Unsupported file type", code=ErrorCode.UNSUPPORTED_FILE_TYPE, details=f"Supported file types: {SupportedFileTypes.IMAGE}")
     else:
         return Image.fromarray(source)
