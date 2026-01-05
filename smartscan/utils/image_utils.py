@@ -1,8 +1,12 @@
 import numpy as np
+import requests
 from PIL import Image, ImageDraw, ImageFont
 
+from smartscan.types import ImageSource
+from smartscan.constants import SupportedFileTypes
+from smartscan.errors import SmartScanError, ErrorCode
+
 def nms(boxes: np.ndarray, scores: np.ndarray, iou_threshold: float):
-    """Simple NMS in NumPy."""
     x1 = boxes[:, 0]
     y1 = boxes[:, 1]
     x2 = boxes[:, 2]
@@ -87,3 +91,14 @@ def crop_faces(image: Image.Image, boxes: np.ndarray, scores: np.ndarray, conf_t
 
     cropped_faces = [image.crop((x1, y1, x2, y2)) for (x1, y1, x2, y2) in filtered_boxes]
     return cropped_faces
+
+def image_source_to_pil_image(source: ImageSource) -> Image.Image:
+    if isinstance(source, str):
+        if source.startswith(("http://", "https://")):
+            return Image.open(requests.get(url=source, stream = True).raw)
+        elif source.endswith(SupportedFileTypes.IMAGE):
+            return Image.open(source)
+        else:
+            raise SmartScanError("Unsupported file type", code=ErrorCode.UNSUPPORTED_FILE_TYPE, details=f"Supported file types: {SupportedFileTypes.IMAGE}")
+    else:
+        return Image.fromarray(source)
