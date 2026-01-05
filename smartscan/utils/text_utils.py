@@ -29,7 +29,7 @@ def chunk_text(s: str, tokenizer_max_length: int, limit: int | None = None):
     return chunks
 
 
-def doc_source_to_text_chunks(source: str, tokenizer_max_length: int, max_chunks: int | None = None) -> list[str]:
+def doc_source_to_text_chunks(source: str, tokenizer_max_length: int = 128, max_chunks: int | None = None) -> list[str]:
     if source.startswith(("http://", "https://")):
         path = urlparse(source).path.lower()
 
