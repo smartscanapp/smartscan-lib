@@ -2,7 +2,6 @@ import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 
 def nms(boxes: np.ndarray, scores: np.ndarray, iou_threshold: float):
-    """Simple NMS in NumPy."""
     x1 = boxes[:, 0]
     y1 = boxes[:, 1]
     x2 = boxes[:, 2]
