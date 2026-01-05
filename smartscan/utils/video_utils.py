@@ -2,6 +2,11 @@
 import numpy as np
 import subprocess
 from numpy.typing import NDArray
+from PIL import Image
+from smartscan.constants import SupportedFileTypes
+from smartscan.errors import SmartScanError, ErrorCode
+from smartscan.types import VideoSource
+
 
 
 def get_video_metadata(source: str) -> tuple[int, int, float]:
@@ -101,3 +106,17 @@ def _get_frames_from_short_video(source: str, n_frames: int, width: int, height:
     proc.stdout.close()
     proc.wait()
     return np.stack(frames, axis=0)
+
+
+def video_source_to_pil_images(source: VideoSource, n_frames: int = 10, short_video_duration: float = 60.0):
+    if isinstance(source, str):
+        if source.startswith(("http", "https")):
+           frame_arrs = get_frames_from_video(source, n_frames, short_video_duration)
+           return [Image.fromarray(frame) for frame in frame_arrs]
+        elif source.endswith(SupportedFileTypes.VIDEO):
+            frame_arrs = get_frames_from_video(source, n_frames, short_video_duration)
+            return [Image.fromarray(frame) for frame in frame_arrs]       
+        else:
+            raise SmartScanError("Unsupported file type", code=ErrorCode.UNSUPPORTED_FILE_TYPE, details=f"Supported file types: {SupportedFileTypes.IMAGE + SupportedFileTypes.TEXT + SupportedFileTypes.VIDEO}")
+    else:
+        return [Image.fromarray(frame_arr) for frame_arr in source]

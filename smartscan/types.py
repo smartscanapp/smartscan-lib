@@ -7,6 +7,9 @@ class ItemEmbedding:
     item_id: str
     embedding: ndarray
 
+ImageSource = str | ndarray
+
+VideoSource = str | ndarray
 
 EncoderType = Literal["image_encoder", "text_encoder", "face_encoder"]
 
