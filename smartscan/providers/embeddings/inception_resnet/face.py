@@ -13,9 +13,7 @@ class InceptionResnetFaceEmbedder(ImageEmbeddingProvider):
     def embedding_dim(self) -> int:
         return 512
 
-    def embed(self, data: Image.Image):
-        """Create vector embeddings for text or image files using an ONNX model."""
-
+    def embed(self, data: Image.Image)-> np.ndarray:
         if not self.is_initialized(): raise SmartScanError("Model not loaded", code=ErrorCode.MODEL_NOT_LOADED, details="Call init method first")
        
         input_name = self._model.get_inputs()[0].name
@@ -26,9 +24,7 @@ class InceptionResnetFaceEmbedder(ImageEmbeddingProvider):
         return embedding
     
 
-    def embed_batch(self, data: list[Image.Image]):
-        """Create vector embeddings for text or image files using an ONNX model."""
-
+    def embed_batch(self, data: list[Image.Image])-> np.ndarray:
         if not self.is_initialized(): raise SmartScanError("Model not loaded", code=ErrorCode.MODEL_NOT_LOADED, details="Call init method first")
          
         input_name = self._model.get_inputs()[0].name

@@ -11,9 +11,7 @@ class UltraLightFaceDetector(DetectorProvider):
         self._model = OnnxModel(model_path)
 
 
-    def detect(self, data: Image.Image):
-        """Detect faces in a image."""
-
+    def detect(self, data: Image.Image)-> tuple[np.ndarray, np.ndarray]:
         if not self.is_initialized(): raise SmartScanError("Model not loaded", code=ErrorCode.MODEL_NOT_LOADED, details="Call init method first")        
         input_name = self._model.get_inputs()[0].name
         image_input = self._preprocess(data)

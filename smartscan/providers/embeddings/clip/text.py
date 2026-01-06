@@ -18,9 +18,7 @@ class ClipTextEmbedder(TextEmbeddingProvider):
     def embedding_dim(self) -> int:
         return self._embedding_dim
 
-    def embed(self, data: str):
-        """Create vector embeddings for text using an ONNX model."""
-
+    def embed(self, data: str)-> np.ndarray:
         if not self.is_initialized(): raise SmartScanError("Model not loaded", code=ErrorCode.MODEL_NOT_LOADED, details="Call init method first")                
         input_name = self._model.get_inputs()[0].name
         token_ids = self._tokenize(data)
@@ -31,9 +29,7 @@ class ClipTextEmbedder(TextEmbeddingProvider):
         return embedding
     
 
-    def embed_batch(self, data: list[str]):
-        """Create vector embeddings for batch of text files using an ONNX model."""
-
+    def embed_batch(self, data: list[str])-> np.ndarray:
         if not self.is_initialized(): raise SmartScanError("Model not loaded", code=ErrorCode.MODEL_NOT_LOADED, details="Call init method first")                
         
         input_name = self._model.get_inputs()[0].name
