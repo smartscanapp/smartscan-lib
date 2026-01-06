@@ -4,7 +4,7 @@ import numpy as np
 
 class DetectorProvider(ABC):
     @abstractmethod
-    def detect(self, data: Any) -> tuple[list[float], list[np.ndarray]]:
+    def detect(self, data: Any) -> tuple[np.ndarray, np.ndarray]:
         pass
   
     @abstractmethod

@@ -2,10 +2,38 @@ from numpy import ndarray
 from typing import Literal, TypeVar
 from dataclasses import dataclass
 
+
+__all__ = [
+    "ItemEmbedding",
+    "Prototype",
+    "ClassificationResult",
+    "ImageSource",
+    "VideoSource",
+    "EncoderType",
+    "ModelName",
+    "Input",
+    "Output",
+]
+
 @dataclass
 class ItemEmbedding:
     item_id: str
     embedding: ndarray
+
+@dataclass
+class Prototype:
+    prototype_id: str
+    embedding: ndarray
+    cohesion_score: float
+    prototype_size: int
+
+
+@dataclass
+class ClassificationResult:
+    item_id: str
+    label: str | None = None
+    similarity: float = 0.0
+
 
 ImageSource = str | ndarray
 

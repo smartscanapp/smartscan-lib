@@ -13,7 +13,7 @@ class DinoSmallV2ImageEmbedder(ImageEmbeddingProvider):
     def embedding_dim(self) -> int:
         return 384
 
-    def embed(self, data: Image.Image):
+    def embed(self, data: Image.Image)-> np.ndarray:
         """Create vector embeddings for text or image files using an ONNX model."""
 
         if not self.is_initialized(): raise SmartScanError("Model not loaded", code=ErrorCode.MODEL_NOT_LOADED, details="Call init method first")
@@ -25,7 +25,7 @@ class DinoSmallV2ImageEmbedder(ImageEmbeddingProvider):
         return embedding
     
 
-    def embed_batch(self, data: list[Image.Image]):
+    def embed_batch(self, data: list[Image.Image])-> np.ndarray:
         """Create vector embeddings for text or image files using an ONNX model."""
 
         if not self.is_initialized(): raise SmartScanError("Model not loaded", code=ErrorCode.MODEL_NOT_LOADED, details="Call init method first")
