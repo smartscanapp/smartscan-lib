@@ -1,7 +1,7 @@
 import numpy as np
 
 from smartscan import Prototype
-from smartscan.cluster.types import ClusterAccuracy, ClusteredItem
+from smartscan.cluster.types import ClusterAccuracy
 
 def compare_clusters(cluster_prototypes: dict[str, Prototype],merge_threshold: float = 0.9,verbose: bool = False) -> dict[str, list[str]]:
     """
@@ -35,35 +35,32 @@ def compare_clusters(cluster_prototypes: dict[str, Prototype],merge_threshold: f
 
     return cluster_merges
 
-def merge_clusters(cluster_merges: dict[str, list[str]], assignments: list[ClusteredItem]) -> list[ClusteredItem]:
-    # Flatten the merge mapping for O(1) lookup
+def merge_clusters(cluster_merges: dict[str, list[str]], assignments: dict[str, str]) -> dict[str, str]:
     flat_merge_map = {
         old_id: merged_id
         for merged_id, cluster_ids in cluster_merges.items()
         for old_id in cluster_ids
     }
 
-    return [
-        ClusteredItem(item.item_id, flat_merge_map.get(item.cluster_id, item.cluster_id))
-        for item in assignments
-    ]
+    return {item_id: flat_merge_map.get(cluster_id, cluster_id)
+            for item_id, cluster_id in assignments.items()}
 
 
-def count_predicted_labels(assignments: list[ClusteredItem], labels: list[str]) -> dict[str, int]:
+def count_predicted_labels(assignments: dict[str, str], labels: list[str]) -> dict[str, int]:
     counts: dict[str, dict[str, int]] = {}
 
-    for item in assignments:
+    for item_id, cluster_id in assignments.items():
         for label in labels:
-            if item.item_id.startswith(label):
+            if item_id.startswith(label):
                 counts.setdefault(label, {})
-                counts[label][item.cluster_id] = counts[label].get(item.cluster_id, 0) + 1
+                counts[label][cluster_id] = counts[label].get(cluster_id, 0) + 1
                 break
 
     return {label: max(cluster_counts.values()) for label, cluster_counts in counts.items()}
 
 
 def calculate_cluster_accuracy(label_counts: dict[str, int], predicted_label_counts: dict[str, int]) -> ClusterAccuracy:
-    per_label_acc = {}
+    per_label_acc = {label: 0 for label in label_counts}
     label_counts = dict(sorted(label_counts.items()))
     predicted_label_counts = dict(sorted(predicted_label_counts.items()))
     running_acc = 0.0
