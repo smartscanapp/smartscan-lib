@@ -8,7 +8,7 @@ from smartscan.processor.processor_listener import ProcessorListener
 from smartscan.processor.memory import MemoryManager
 from smartscan.utils.async_utils import AtomicInteger
 from smartscan.processor.metrics import  MetricsFailure, MetricsSuccess
-from smartscan.types import Input, Output
+from smartscan.processor.types import Input, Output
 
 
 class BatchProcessor(ABC, Generic[Input, Output]):
