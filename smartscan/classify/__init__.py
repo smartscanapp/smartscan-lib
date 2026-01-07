@@ -1,1 +1,4 @@
 from smartscan.classify.few_shot import FewShotClassifier, few_shot_classify
+from smartscan.classify.helpers import merge_similar_clusters
+from smartscan.classify.incremental_clusterer import IncrementalClusterer
+from smartscan.classify.metrics import calculate_cluster_accuracy, ClusterMetricTracker
