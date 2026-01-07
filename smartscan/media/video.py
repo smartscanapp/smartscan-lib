@@ -5,7 +5,7 @@ from numpy.typing import NDArray
 from PIL import Image
 from smartscan.constants import SupportedFileTypes
 from smartscan.errors import SmartScanError, ErrorCode
-from smartscan.types import VideoSource
+from smartscan.media.types import VideoSource
 
 
 

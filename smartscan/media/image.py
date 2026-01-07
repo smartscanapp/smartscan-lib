@@ -2,7 +2,7 @@ import numpy as np
 import requests
 from PIL import Image, ImageDraw, ImageFont
 
-from smartscan.types import ImageSource
+from smartscan.media.types import ImageSource
 from smartscan.constants import SupportedFileTypes
 from smartscan.errors import SmartScanError, ErrorCode
 

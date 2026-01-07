@@ -3,7 +3,6 @@ from smartscan.constants import SupportedFileTypes
 from smartscan.utils import read_text_file
 from urllib.parse import urlparse
 import requests
-import os
 
 def chunk_text(s: str, tokenizer_max_length: int, limit: int | None = None):
     max_chunks = len(s) // 4 * tokenizer_max_length
