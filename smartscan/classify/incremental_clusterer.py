@@ -2,12 +2,15 @@ import numpy as np
 import random
 import uuid
 
-from smartscan.embeds.types import ItemEmbedding, Prototype
-from smartscan.embeds import update_prototype_embedding, update_cohesion_score
+from typing import Dict
+from smartscan.classify.types import BaseCluster, Assignments, UnLabelledCluster, ClusterMetadata
+from smartscan.classify.metrics import ClusterMetricTracker
+from smartscan.embeds.types import ItemEmbedding
+from smartscan.embeds import update_prototype_embedding
 
 class IncrementalClusterer():
     """
-    IncrementalClusterer incrementally clusters items using prototype-based centroids.
+    IncrementalClusterer incrementally clusters items using cluster-based centroids.
 
     Items are assigned to the most similar existing cluster or form a new cluster if no
     sufficient match exists. Small/weak clusters are periodically purged, and items from
@@ -16,7 +19,7 @@ class IncrementalClusterer():
 
     def __init__(
         self,
-        existing_prototypes: dict[str, Prototype] = {},
+        existing_clusters: Dict[str, UnLabelledCluster] = {},
         default_threshold: float = 0.3,
         sim_factor: float = 1.0,
         min_cluster_size: int = 5,
@@ -24,8 +27,8 @@ class IncrementalClusterer():
     ):
         self.default_threshold = default_threshold
         self.sim_factor = sim_factor
-        self.prototypes: dict[str, Prototype] = existing_prototypes
-        self.assignments: dict[str, str] = {}
+        self.clusters: Dict[str, UnLabelledCluster] = existing_clusters
+        self.assignments: Assignments = {}
         self.min_cluster_size = min_cluster_size
         self.top_k = top_k
         self.max_batch_size = 10_000
@@ -43,7 +46,7 @@ class IncrementalClusterer():
             self._assign_batch(batch)
 
             # Periodically purge weak clusters to avoid buildup
-            check_clusters_to_purge = len(self.prototypes) > 0 and len(self.assignments) % int(max_singleton_clusters * 0.1) == 0
+            check_clusters_to_purge = len(self.clusters) > 0 and len(self.assignments) % int(max_singleton_clusters * 0.1) == 0
             if check_clusters_to_purge:
                 weak_clusters_ids, weak_assignments_ids = self._get_weak_clusters(2)
                 if len(weak_assignments_ids) >= max_singleton_clusters:
@@ -63,71 +66,73 @@ class IncrementalClusterer():
         self._remove_clusters(weak_clusters_ids)
         self._remove_assignments(weak_assignments_ids)
 
-        return self.prototypes, self.assignments
+        return self.clusters, self.assignments
 
     def _assign_batch(self, batch: list[ItemEmbedding]):
-        if not self.prototypes:
+        if not self.clusters:
             for item in batch:
                 self._set_and_assign(item)
             return
 
-        cluster_ids, prototype_embeds = zip(*(((p.prototype_id, p.embedding) for p in self.prototypes.values())))
+        cluster_ids, cluster_embeds = zip(*(((p.prototype_id, p.embedding) for p in self.clusters.values())))
 
         for item in batch:
-            sims = np.dot(prototype_embeds, item.embedding)
+            sims = np.dot(cluster_embeds, item.embedding)
             # Get top-k candidate clustersn to reduce order bias from early assignments
             top_k_indices = np.argsort(sims)[-self.top_k:][::-1]  # descending
             assigned = False
             for idx in top_k_indices:
-                prototype = self.prototypes[cluster_ids[idx]]
-                if sims[idx] >= self.sim_factor * prototype.cohesion_score:
-                    self._update_and_assign(item, prototype)
+                cluster = self.clusters[cluster_ids[idx]]
+                if sims[idx] >= self.sim_factor * cluster.cohesion_score:
+                    self._update_and_assign(item, cluster)
                     assigned = True
                     break
             if not assigned:
                 self._set_and_assign(item)
 
     def clear(self):
-        self.prototypes.clear()
+        self.clusters.clear()
         self.assignments.clear()
 
     def _assign_items(self, item: ItemEmbedding, retry_sim_factor: float | None = None):
-        if len(self.prototypes) == 0:
+        if len(self.clusters) == 0:
             self._set_and_assign(item)
             return
 
-        cluster_ids, prototype_embeds = zip(*(((p.prototype_id, p.embedding) for p in self.prototypes.values())))
-        sims = np.dot(prototype_embeds, item.embedding)
+        cluster_ids, cluster_embeds = zip(*(((c.prototype_id, c.embedding) for c in self.clusters.values())))
+        sims = np.dot(cluster_embeds, item.embedding)
         best_idx = np.argmax(sims)
-        prototype = self.prototypes[cluster_ids[best_idx]]
+        cluster = self.clusters[cluster_ids[best_idx]]
         factor = retry_sim_factor if retry_sim_factor else self.sim_factor
 
-        if sims[best_idx] >= factor * prototype.cohesion_score:
-            self._update_and_assign(item, prototype)
+        if sims[best_idx] >= factor * cluster.cohesion_score:
+            self._update_and_assign(item, cluster)
         else:
             self._set_and_assign(item)
 
     def _get_weak_clusters(self, n: int):
-        weak_cluster_ids = {c.prototype_id for c in self.prototypes.values() if c.prototype_size < n}
+        weak_cluster_ids = {c.prototype_id for c in self.clusters.values() if c.prototype_size < n}
         weak_assignments_ids = {item_id for item_id, proto_id in self.assignments.items() if proto_id in weak_cluster_ids}
         return weak_cluster_ids, weak_assignments_ids
 
     def _set_and_assign(self, item: ItemEmbedding):
         prototype_id = uuid.uuid4().hex
-        prototype = Prototype(prototype_id, item.embedding, self.default_threshold, prototype_size=1)
-        self.prototypes[prototype_id] = prototype
+        new_cluster = UnLabelledCluster(prototype_id, item.embedding, ClusterMetadata(prototype_size=1))
+        self.clusters[prototype_id] = new_cluster
         self.assignments[item.item_id] = prototype_id
 
-    def _update_and_assign(self, item: ItemEmbedding, prototype: Prototype):
-        new_embedding = update_prototype_embedding(prototype.embedding, item.embedding, prototype.prototype_size)
-        new_cohesion = update_cohesion_score(prototype.cohesion_score, prototype.prototype_size, prototype.embedding, item.embedding)
-        updated = Prototype(prototype.prototype_id, new_embedding, new_cohesion, prototype.prototype_size + 1)
-        self.prototypes[prototype.prototype_id] = updated
-        self.assignments[item.item_id] = prototype.prototype_id
+    def _update_and_assign(self, item: ItemEmbedding, cluster: BaseCluster):
+        new_embedding = update_prototype_embedding(cluster.embedding, item.embedding, cluster.prototype_size)
+        metrics_tracker = ClusterMetricTracker(cluster, np.stack([c.embedding for c in self.clusters.values()], axis=0))
+        metrics_tracker.add_samples(item.embedding)
+        updated = UnLabelledCluster(cluster.prototype_id, new_embedding, metadata=metrics_tracker.get_metrics())
+        metrics_tracker.add_samples(item.embedding)
+        self.clusters[cluster.prototype_id] = updated
+        self.assignments[item.item_id] = cluster.prototype_id
 
     def _remove_clusters(self, cluster_ids: set[str] | list[str]):
         for pid in cluster_ids:
-            self.prototypes.pop(pid, None)
+            self.clusters.pop(pid, None)
 
     def _remove_assignments(self, assignment_ids: set[str] | list[str]):
         for item_id in assignment_ids:
