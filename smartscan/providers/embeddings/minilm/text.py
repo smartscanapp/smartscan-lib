@@ -7,10 +7,10 @@ from smartscan.errors import SmartScanError, ErrorCode
 
 
 class MiniLmTextEmbedder(TextEmbeddingProvider):
-    def __init__(self, model_path: str):
+    def __init__(self, model_path: str,  max_tokenizer_length: int):
         self._model = OnnxModel(model_path)
         self._embedding_dim = 384
-        self._max_len = 128
+        self._max_len = max_tokenizer_length
         with resources.path("smartscan.providers.embeddings.minilm", "vocab.txt") as vocab_path:
                 self.tokenizer = load_minilm_tokenizer(str(vocab_path))
     @property
