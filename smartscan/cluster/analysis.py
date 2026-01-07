@@ -59,15 +59,15 @@ def count_predicted_labels(assignments: dict[str, str], labels: list[str]) -> di
     return {label: max(cluster_counts.values()) for label, cluster_counts in counts.items()}
 
 
-def calculate_cluster_accuracy(label_counts: dict[str, int], predicted_label_counts: dict[str, int]) -> ClusterAccuracy:
-    per_label_acc = {label: 0 for label in label_counts}
-    label_counts = dict(sorted(label_counts.items()))
-    predicted_label_counts = dict(sorted(predicted_label_counts.items()))
+def calculate_cluster_accuracy(labelled_cluster_counts: dict[str, int], predicted_cluster_counts: dict[str, int]) -> ClusterAccuracy:
+    per_cluster_acc = {cluster_id: 0 for cluster_id in labelled_cluster_counts}
+    labelled_cluster_counts = dict(sorted(labelled_cluster_counts.items()))
+    predicted_cluster_counts = dict(sorted(predicted_cluster_counts.items()))
     running_acc = 0.0
 
-    for ((label, count), (_, predict_count)) in zip(label_counts.items(), predicted_label_counts.items()):
+    for ((label, count), (_, predict_count)) in zip(labelled_cluster_counts.items(), predicted_cluster_counts.items()):
         prediction_acc = float(predict_count / count)
-        per_label_acc[label] = prediction_acc
+        per_cluster_acc[label] = prediction_acc
         running_acc += prediction_acc
         
-    return ClusterAccuracy(per_label_acc, running_acc/len(per_label_acc))
+    return ClusterAccuracy(per_cluster_acc, running_acc/len(per_cluster_acc))
