@@ -61,19 +61,3 @@ def load_embedding(filepath: str) -> np.ndarray:
     """Loads embedding from a file."""
     with open(filepath, 'rb') as f:
         return pickle.load(f)
-
-
-def calculate_cohesion_score(prototype: np.ndarray, sample_batch: np.ndarray) -> float:
-    return np.mean(np.dot(sample_batch, prototype))
-
-def update_cohesion_score(current_score: float, n: int, prototype_embedding: np.ndarray, new_samples: np.ndarray) -> float:
-    if new_samples.ndim == 1:
-        new_samples = new_samples[np.newaxis, :] 
-
-    m = new_samples.shape[0]
-    if m == 0:
-        return current_score
-
-    new_sum = np.sum(np.dot(new_samples, prototype_embedding))
-    return (current_score * n + new_sum) / (n + m)
-
