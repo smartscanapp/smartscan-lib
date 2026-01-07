@@ -3,8 +3,9 @@ from typing import Literal, Generic, TypeVar, Optional, Any, Dict, Union, Callab
 from dataclasses import dataclass
 
 
-TData = TypeVar("TData", bound=Any, default=None)
-TMetadata = TypeVar("TMetadata", bound=Dict, default=None)
+TData = TypeVar("TData", bound=Any)
+TMetadata = TypeVar("TMetadata", bound=Dict)
+
 FilterType = Union[Dict[str, Any], Callable[[Any], bool]] 
 
 __all__ = [
@@ -29,7 +30,7 @@ class GetResult(ItemEmbedding[TData, TMetadata]):
 
 @dataclass
 class QueryResult(GetResult[TData, TMetadata]):
-    sim: float
+    sim: Optional[float] = None
 
 @dataclass
 class Prototype:
