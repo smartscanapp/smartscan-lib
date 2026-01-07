@@ -1,6 +1,6 @@
 import numpy as np
 
-from smartscan import Prototype
+from smartscan.types import Prototype
 from smartscan.cluster.types import ClusterAccuracy
 
 def compare_clusters(cluster_prototypes: dict[str, Prototype],merge_threshold: float = 0.9,verbose: bool = False) -> dict[str, list[str]]:
