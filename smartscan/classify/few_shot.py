@@ -1,6 +1,7 @@
 import numpy as np
 from smartscan.processor import BatchProcessor, ProcessorListener
-from smartscan.types import ClassificationResult, ItemEmbedding, Prototype
+from smartscan.classify.types import ClassificationResult
+from smartscan.embeds.types import ItemEmbedding, Prototype
 
 class FewShotClassifier(BatchProcessor[ItemEmbedding, ClassificationResult]):
     def __init__(self, 

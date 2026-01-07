@@ -2,7 +2,7 @@ import numpy as np
 import random
 import uuid
 
-from smartscan import ItemEmbedding, Prototype
+from smartscan.embeds.types import ItemEmbedding, Prototype
 from smartscan.embeddings import update_prototype_embedding, update_cohesion_score
 
 class IncrementalClusterer():
