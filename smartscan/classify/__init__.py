@@ -1,0 +1,1 @@
+from smartscan.classify.few_shot import FewShotClassifier, few_shot_classify
