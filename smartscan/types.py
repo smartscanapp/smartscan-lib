@@ -3,19 +3,12 @@ from typing import Literal, TypeVar
 from dataclasses import dataclass
 from smartscan.cluster.types import *
 from smartscan.embeds.types import *
-
-
-@dataclass
-class ClassificationResult:
-    item_id: str
-    label: str | None = None
-    similarity: float = 0.0
+from smartscan.classify.types import ClassificationResult
 
 
 ImageSource = str | ndarray
 
 VideoSource = str | ndarray
-
 
 ModelName = Literal[
     "clip-vit-b-32-image",
