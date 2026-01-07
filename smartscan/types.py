@@ -1,14 +1,8 @@
-from numpy import ndarray
-from typing import Literal, TypeVar
-from dataclasses import dataclass
+from typing import Literal
 from smartscan.cluster.types import *
 from smartscan.embeds.types import *
 from smartscan.classify.types import ClassificationResult
-
-
-ImageSource = str | ndarray
-
-VideoSource = str | ndarray
+from smartscan.media.types import VideoSource, ImageSource
 
 ModelName = Literal[
     "clip-vit-b-32-image",
