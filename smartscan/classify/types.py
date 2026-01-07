@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from numpy import ndarray
-from typing import Optional, NewType, Dict, TypeAlias
+from typing import Optional, NewType, Dict, TypeAlias, List
 
 __all__ = [
     "ClassificationResult",
@@ -12,7 +12,11 @@ __all__ = [
     "UnLabelledCluster",
     "ItemId",
     "ClusterId",
-    "Assignments"
+    "Assignments",
+    "MergeId",
+    "TargetClusters",
+    "ClusterMerges"
+
 ]
 
 @dataclass(frozen=True)
@@ -57,6 +61,11 @@ ClusterId = NewType("ClusterId", str)
 
 Assignments = Dict[ItemId, ClusterId]
 
+
+MergeId = NewType("MergeId", str)
+TargetClusters = NewType("TargetClusters", List[str])
+
+ClusterMerges = Dict[MergeId, TargetClusters]
 
 
 

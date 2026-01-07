@@ -1,10 +1,11 @@
 import numpy as np
 
-from smartscan.classify.types import BaseCluster
+from typing import Dict
+from smartscan.classify.types import BaseCluster, ClusterMerges
 
 
-def merge_similar_clusters(cluster_prototypes: dict[str, BaseCluster], merge_threshold: float = 0.9,verbose: bool = False) -> dict[str, str]:
-    cluster_merges: dict[str, list[str]] = {}
+def merge_similar_clusters(cluster_prototypes: Dict[str, BaseCluster], merge_threshold: float = 0.9,verbose: bool = False) -> ClusterMerges:
+    cluster_merges: ClusterMerges = {}
     cluster_ids = list(cluster_prototypes.keys())
     cluster_embeds = [p.embedding for p in cluster_prototypes.values()]
 
