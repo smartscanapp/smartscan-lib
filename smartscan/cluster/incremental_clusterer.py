@@ -3,7 +3,7 @@ import random
 import uuid
 
 from smartscan.embeds.types import ItemEmbedding, Prototype
-from smartscan.embeddings import update_prototype_embedding, update_cohesion_score
+from smartscan.embeds import update_prototype_embedding, update_cohesion_score
 
 class IncrementalClusterer():
     """
