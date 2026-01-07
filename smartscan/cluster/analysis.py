@@ -46,19 +46,6 @@ def merge_clusters(cluster_merges: dict[str, list[str]], assignments: dict[str, 
             for item_id, cluster_id in assignments.items()}
 
 
-def count_predicted_labels(assignments: dict[str, str], labels: list[str]) -> dict[str, int]:
-    counts: dict[str, dict[str, int]] = {}
-
-    for item_id, cluster_id in assignments.items():
-        for label in labels:
-            if item_id.startswith(label):
-                counts.setdefault(label, {})
-                counts[label][cluster_id] = counts[label].get(cluster_id, 0) + 1
-                break
-
-    return {label: max(cluster_counts.values()) for label, cluster_counts in counts.items()}
-
-
 def calculate_cluster_accuracy(labelled_cluster_counts: dict[str, int], predicted_cluster_counts: dict[str, int]) -> ClusterAccuracy:
     per_cluster_acc = {cluster_id: 0 for cluster_id in labelled_cluster_counts}
     labelled_cluster_counts = dict(sorted(labelled_cluster_counts.items()))
