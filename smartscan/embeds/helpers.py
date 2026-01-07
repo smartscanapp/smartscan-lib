@@ -2,8 +2,8 @@
 import numpy as np
 import pickle
 
-from smartscan.types import VideoSource, ImageSource
-from smartscan.utils import  video_source_to_pil_images, image_source_to_pil_image, doc_source_to_text_chunks
+from smartscan.media.types import VideoSource, ImageSource
+from smartscan.media import  video_source_to_pil_images, image_source_to_pil_image, doc_source_to_text_chunks
 from smartscan.providers import ImageEmbeddingProvider, TextEmbeddingProvider
 
 _all__ = [
