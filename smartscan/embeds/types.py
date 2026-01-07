@@ -12,7 +12,6 @@ __all__ = [
     "ItemEmbedding",
     "GetResult",
     "QueryResult",
-    "Prototype",
     "EncoderType",
     "FilterType",
 ]
@@ -31,13 +30,6 @@ class GetResult(ItemEmbedding[TData, TMetadata]):
 @dataclass
 class QueryResult(GetResult[TData, TMetadata]):
     sim: Optional[float] = None
-
-@dataclass
-class Prototype:
-    prototype_id: str
-    embedding: ndarray
-    cohesion_score: float
-    prototype_size: int
 
 
 EncoderType = Literal["image_encoder", "text_encoder", "face_encoder"]
