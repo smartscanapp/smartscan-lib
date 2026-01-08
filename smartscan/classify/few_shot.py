@@ -30,7 +30,7 @@ def few_shot_classify(item: ItemEmbedding, labelled_clusters: list[LabelledClust
                 similarity = np.dot(item.embedding, cluster.embedding)
             except Exception as e:
                 continue
-            if similarity > best_sim and similarity >= sim_factor * cluster.cohesion_score:
+            if similarity > best_sim and similarity >= sim_factor * cluster.metadata.mean_similarity:
                 label = cluster.label
                 best_sim = similarity
         return ClassificationResult(item_id=item.item_id, label=label, similarity=float(best_sim))

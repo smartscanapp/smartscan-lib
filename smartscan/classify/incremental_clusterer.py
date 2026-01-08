@@ -89,7 +89,7 @@ class IncrementalClusterer():
             assigned = False
             for idx in top_k_indices:
                 cluster = self.clusters[cluster_ids[idx]]
-                if sims[idx] >= self.sim_factor * cluster.cohesion_score:
+                if sims[idx] >= self.sim_factor * cluster.metadata.mean_similarity:
                     self._update_and_assign(item, cluster)
                     assigned = True
                     break
@@ -111,7 +111,7 @@ class IncrementalClusterer():
         cluster = self.clusters[cluster_ids[best_idx]]
         factor = retry_sim_factor if retry_sim_factor else self.sim_factor
 
-        if sims[best_idx] >= factor * cluster.cohesion_score:
+        if sims[best_idx] >= factor * cluster.metadata.mean_similarity:
             self._update_and_assign(item, cluster)
         else:
             self._set_and_assign(item)
