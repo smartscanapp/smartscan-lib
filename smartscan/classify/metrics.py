@@ -34,12 +34,13 @@ class ClusterMetricTracker:
         # update nearest other cluster similarity
         if self.other_prototypes is not None and len(self.other_prototypes) > 0:
             nearest = np.max(np.dot(self.other_prototypes, self.cluster.embedding))
-            self.nearest_other_similarity = max(self.nearest_other_similarity, nearest)
+            self.nearest_other_similarity = max(self.nearest_other_similarity or nearest, nearest)
         # update separation
         self.separation_margin = self.mean_similarity - (self.nearest_other_similarity or 0.0)
 
     def get_metrics(self) -> ClusterMetrics:
         return ClusterMetrics(
+            prototype_size=self.n,
             mean_similarity=self.mean_similarity,
             min_similarity=self.min_similarity,
             max_similarity=self.max_similarity,

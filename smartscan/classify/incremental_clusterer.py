@@ -117,7 +117,7 @@ class IncrementalClusterer():
             self._set_and_assign(item)
 
     def _get_weak_clusters(self, n: int):
-        weak_cluster_ids = {c.prototype_id for c in self.clusters.values() if c.prototype_size < n}
+        weak_cluster_ids = {c.prototype_id for c in self.clusters.values() if c.metadata.prototype_size < n}
         weak_assignments_ids = {item_id for item_id, proto_id in self.assignments.items() if proto_id in weak_cluster_ids}
         return weak_cluster_ids, weak_assignments_ids
 
@@ -128,7 +128,7 @@ class IncrementalClusterer():
         self.assignments[item.item_id] = prototype_id
 
     def _update_and_assign(self, item: ItemEmbedding, cluster: BaseCluster):
-        new_embedding = update_prototype_embedding(cluster.embedding, item.embedding, cluster.prototype_size)
+        new_embedding = update_prototype_embedding(cluster.embedding, item.embedding, cluster.metadata.prototype_size)
         metrics_tracker = ClusterMetricTracker(cluster, np.stack([c.embedding for c in self.clusters.values()], axis=0))
         metrics_tracker.add_samples(item.embedding)
         updated = UnLabelledCluster(cluster.prototype_id, new_embedding, metadata=metrics_tracker.get_metrics())
