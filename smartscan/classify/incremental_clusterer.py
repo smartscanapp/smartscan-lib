@@ -28,6 +28,7 @@ class IncrementalClusterer:
         sim_factor: float = 1.0,
         min_cluster_size: int = 5,
         top_k: int = 3,
+        benchmarking: bool = False
     ):
         self.default_threshold = default_threshold
         self.sim_factor = sim_factor
@@ -38,6 +39,7 @@ class IncrementalClusterer:
         self.max_batch_size = 10_000
         self.min_batch_size = 10
         self.merge_threshold = merge_threshold
+        self.benchmarking = benchmarking
 
     def cluster(self, ids: List[str], embeddings: List[np.ndarray]) -> ClusterResult:
         items = list(zip(ids, embeddings))
@@ -149,7 +151,7 @@ class IncrementalClusterer:
         return weak_cluster_ids, weak_assignment_ids
 
     def _set_and_assign(self, item_id: str, embedding: np.ndarray):
-        prototype_id = uuid.uuid4().hex
+        prototype_id = self._generate_id()
         cluster = UnLabelledCluster(
             prototype_id,
             embedding,
@@ -192,3 +194,8 @@ class IncrementalClusterer:
     def _remove_assignments(self, assignment_ids: set[str] | list[str]):
         for item_id in assignment_ids:
             self.assignments.pop(item_id, None)
+    
+    # seed randomness during benchmarking for reproduceability
+    def _generate_id(self):
+        return random.randbytes(8).hex() if self.benchmarking else uuid.uuid4().hex
+
