@@ -2,8 +2,9 @@ import numpy as np
 import random
 import uuid
 
-from typing import Dict
-from smartscan.classify.types import BaseCluster, Assignments, UnLabelledCluster, ClusterMetadata
+from typing import Dict, Optional
+from smartscan.classify.helpers import merge_similar_clusters
+from smartscan.classify.types import BaseCluster, Assignments, UnLabelledCluster, ClusterMetadata, ClusterResult
 from smartscan.classify.metrics import ClusterMetricTracker
 from smartscan.embeds.types import ItemEmbedding
 from smartscan.embeds import update_prototype_embedding
@@ -21,6 +22,7 @@ class IncrementalClusterer():
         self,
         existing_clusters: Dict[str, UnLabelledCluster] = {},
         default_threshold: float = 0.3,
+        merge_threshold: Optional[float] = None,
         sim_factor: float = 1.0,
         min_cluster_size: int = 5,
         top_k: int = 3
@@ -33,9 +35,10 @@ class IncrementalClusterer():
         self.top_k = top_k
         self.max_batch_size = 10_000
         self.min_batch_size = 10
+        self.merge_threshold = merge_threshold
 
 
-    def cluster(self, items: list[ItemEmbedding]):
+    def cluster(self, items: list[ItemEmbedding]) -> ClusterResult:
         random.shuffle(items)
         
         batch_size = min(self.max_batch_size, max(self.min_batch_size, int(len(items) * 0.01)))
@@ -66,7 +69,10 @@ class IncrementalClusterer():
         self._remove_clusters(weak_clusters_ids)
         self._remove_assignments(weak_assignments_ids)
 
-        return self.clusters, self.assignments
+        cluster_merges = None
+        if self.merge_threshold:
+            cluster_merges = merge_similar_clusters(self.clusters, self.merge_threshold)
+        return ClusterResult(self.clusters, self.assignments, cluster_merges)
 
     def _assign_batch(self, batch: list[ItemEmbedding]):
         if not self.clusters:

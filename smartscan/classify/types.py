@@ -20,13 +20,6 @@ __all__ = [
 ]
 
 @dataclass(frozen=True)
-class ClassificationResult:
-    item_id: str
-    label: str | None = None
-    similarity: float = 0.0
-
-
-@dataclass(frozen=True)
 class ClusterAccuracy:
     per_label: Dict[str, float]
     mean_accuracy: float
@@ -55,17 +48,26 @@ class LabelledCluster(BaseCluster):
 
 UnLabelledCluster: TypeAlias = BaseCluster
 
-
 ItemId = NewType("ItemId", str)
 ClusterId = NewType("ClusterId", str)
-
 Assignments = Dict[ItemId, ClusterId]
-
 
 MergeId = NewType("MergeId", str)
 TargetClusters = NewType("TargetClusters", List[str])
-
 ClusterMerges = Dict[MergeId, TargetClusters]
+
+@dataclass(frozen=True)
+class ClassificationResult:
+    item_id: str
+    label: str | None = None
+    similarity: float = 0.0
+
+@dataclass(frozen=True)
+class ClusterResult:
+    clusters:  Dict[str, BaseCluster]
+    assignments: Assignments
+    merges: Optional[ClusterMerges] = None
+
 
 
 
