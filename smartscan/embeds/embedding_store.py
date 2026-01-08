@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import Generic, List, Optional
-from smartscan.embeds.types import TData, TMetadata , FilterType, ItemEmbedding, GetResult, QueryResult
+from smartscan.embeds.types import TData, TMetadata , FilterType, ItemEmbedding, GetResult, QueryResult, Include
 import numpy as np
 
 
@@ -20,7 +20,7 @@ class EmbeddingStore(ABC, Generic[TData, TMetadata]):
         filter: Optional[FilterType] = None,
         limit: Optional[int] = None,
         offset: Optional[int] = None,
-        include: Optional[List[str]] = None,
+        include: Include = ["metadatas"],
     ) -> GetResult:
         """Retrieve embeddings and their data/metadata by IDs or filter."""
         raise NotImplementedError
@@ -31,7 +31,7 @@ class EmbeddingStore(ABC, Generic[TData, TMetadata]):
         query_embeds: List[np.ndarray],
         filter: Optional[FilterType] = None,
         limit: int = 10,
-        include: Optional[List[str]] = None,
+        include: Include = ["metadatas"],
     ) -> QueryResult:
         """Return nearest neighbors for given query embeddings with optional filters."""
         raise NotImplementedError

@@ -35,3 +35,7 @@ class QueryResult(GetResult[TData, TMetadata]):
     sims: List[float] = field(default_factory=list)
 
 EncoderType = Literal["image_encoder", "text_encoder", "face_encoder"]
+
+Include = List[
+    Literal["documents", "embeddings", "metadatas", "sims", "data"]
+]
