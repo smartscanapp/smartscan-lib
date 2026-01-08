@@ -1,6 +1,6 @@
 from numpy import ndarray
-from typing import Literal, Generic, TypeVar, Optional, Any, Dict, Union, Callable
-from dataclasses import dataclass
+from typing import Literal, Generic, TypeVar, Optional, Any, Dict, Union, Callable, List
+from dataclasses import dataclass, field
 
 
 TData = TypeVar("TData", bound=Any)
@@ -23,13 +23,15 @@ class ItemEmbedding(Generic[TData, TMetadata]):
     data: Optional[TData] = None
     metadata: Optional[TMetadata] = None
 
-@dataclass
-class GetResult(ItemEmbedding[TData, TMetadata]):
-    embedding: Optional[ndarray] = None
+@dataclass(frozen=True)
+class GetResult(Generic[TData, TMetadata]):
+    ids: List[str] = field(default_factory=list)
+    embeddings: List[ndarray] = field(default_factory=list)
+    metadatas: List[Optional[TMetadata]] = field(default_factory=list)
+    datas: List[Optional[TData]] = field(default_factory=list)
 
-@dataclass
+@dataclass(frozen=True)
 class QueryResult(GetResult[TData, TMetadata]):
-    sim: Optional[float] = None
-
+    sims: List[float] = field(default_factory=list)
 
 EncoderType = Literal["image_encoder", "text_encoder", "face_encoder"]

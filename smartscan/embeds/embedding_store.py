@@ -21,7 +21,7 @@ class EmbeddingStore(ABC, Generic[TData, TMetadata]):
         limit: Optional[int] = None,
         offset: Optional[int] = None,
         include: Optional[List[str]] = None,
-    ) -> List[GetResult]:
+    ) -> GetResult:
         """Retrieve embeddings and their data/metadata by IDs or filter."""
         raise NotImplementedError
 
@@ -32,7 +32,7 @@ class EmbeddingStore(ABC, Generic[TData, TMetadata]):
         filter: Optional[FilterType] = None,
         limit: int = 10,
         include: Optional[List[str]] = None,
-    ) -> List[QueryResult]:
+    ) -> QueryResult:
         """Return nearest neighbors for given query embeddings with optional filters."""
         raise NotImplementedError
 
