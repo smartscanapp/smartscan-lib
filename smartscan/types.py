@@ -2,6 +2,7 @@ from typing import Literal
 from smartscan.embeds.types import *
 from smartscan.classify.types import *
 from smartscan.media.types import VideoSource, ImageSource
+from smartscan.providers import TextEmbeddingProvider, ImageEmbeddingProvider, EmbeddingProvider
 
 ModelName = Literal[
     "clip-vit-b-32-image",
