@@ -17,6 +17,10 @@ class ClipTextEmbedder(TextEmbeddingProvider):
     @property
     def embedding_dim(self) -> int:
         return self._embedding_dim
+    
+    @property
+    def max_tokenizer_length(self) -> int:
+        self._max_len
 
     def embed(self, data: str)-> np.ndarray:
         if not self.is_initialized(): raise SmartScanError("Model not loaded", code=ErrorCode.MODEL_NOT_LOADED, details="Call init method first")                

@@ -16,7 +16,11 @@ class MiniLmTextEmbedder(TextEmbeddingProvider):
     @property
     def embedding_dim(self) -> int:
         return self._embedding_dim
-
+    
+    @property
+    def max_tokenizer_length(self) -> int:
+        self._max_len
+        
     def embed(self, data: str) -> np.ndarray:
         if not self.is_initialized(): raise SmartScanError("Model not loaded", code=ErrorCode.MODEL_NOT_LOADED, details="Call init method first")
         input_name = self._model.get_inputs()[0].name
@@ -57,4 +61,4 @@ class MiniLmTextEmbedder(TextEmbeddingProvider):
     
     def _tokenize(self, text):
         token_ids = self.tokenizer.encode(text).ids
-        return token_ids[:self._max_len] + [0] * (self._max_len - len(token_ids))
+        return token_ids[:self.max_tokenizer_length] + [0] * (self.max_tokenizer_length - len(token_ids))
