@@ -9,25 +9,35 @@ class EmbeddingProvider(ABC, Generic[T]):
     @property
     @abstractmethod
     def embedding_dim(self) -> int:
-        pass
+        raise NotImplementedError
+    
     @abstractmethod
     def embed(self, data: T) -> np.ndarray:
-        pass
+        raise NotImplementedError
+    
     @abstractmethod
     def embed_batch(self, data: list[T]) -> np.ndarray:
-        pass
+        raise NotImplementedError
 
     @abstractmethod
     def init(self):
-        pass
+        raise NotImplementedError
 
     @abstractmethod
     def is_initialized(self) -> bool: 
-        pass
+        raise NotImplementedError
     
     @abstractmethod
     def close_session(self):
-        pass
+        raise NotImplementedError
+
+
+class TextEmbeddingProviderBase(EmbeddingProvider[str], ABC):
+    @property
+    @abstractmethod
+    def max_tokenizer_length(self) -> int:
+        raise NotImplementedError
+
 
 ImageEmbeddingProvider = EmbeddingProvider[Image.Image]
-TextEmbeddingProvider = EmbeddingProvider[str]
+TextEmbeddingProvider = TextEmbeddingProviderBase
