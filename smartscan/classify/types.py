@@ -15,8 +15,8 @@ __all__ = [
     "Assignments",
     "MergeId",
     "TargetClusters",
-    "ClusterMerges"
-
+    "ClusterMerges",
+    "ClusterResult"
 ]
 
 @dataclass(frozen=True)
@@ -53,7 +53,7 @@ ClusterId = NewType("ClusterId", str)
 Assignments = Dict[ItemId, ClusterId]
 
 MergeId = NewType("MergeId", str)
-TargetClusters = NewType("TargetClusters", List[str])
+TargetClusters = NewType("TargetClusters", List[ClusterId])
 ClusterMerges = Dict[MergeId, TargetClusters]
 
 @dataclass(frozen=True)
@@ -64,7 +64,7 @@ class ClassificationResult:
 
 @dataclass(frozen=True)
 class ClusterResult:
-    clusters:  Dict[str, BaseCluster]
+    clusters:  Dict[ClusterId, BaseCluster]
     assignments: Assignments
     merges: Optional[ClusterMerges] = None
 

@@ -174,7 +174,7 @@ class IncrementalClusterer:
 
         metrics_tracker = ClusterMetricTracker(
             cluster,
-            np.stack([c.embedding for c in self.clusters.values()], axis=0),
+            np.stack([c.embedding for c in self.clusters.values() if c.prototype_id != cluster.prototype_id], axis=0),
         )
         metrics_tracker.add_samples(embedding)
 
