@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from numpy import ndarray
 from typing import Optional, NewType, Dict, TypeAlias, List
+from pydantic import Field, BaseModel
 
 __all__ = [
     "ClassificationResult",
@@ -56,17 +57,15 @@ MergeId = NewType("MergeId", str)
 TargetClusters = NewType("TargetClusters", List[ClusterId])
 ClusterMerges = Dict[MergeId, TargetClusters]
 
-@dataclass(frozen=True)
-class ClassificationResult:
+class ClassificationResult(BaseModel):
     item_id: str
-    label: str | None = None
-    similarity: float = 0.0
+    label: Optional[str] = Field(default=None)
 
 @dataclass(frozen=True)
 class ClusterResult:
     clusters:  Dict[ClusterId, BaseCluster]
     assignments: Assignments
-    merges: Optional[ClusterMerges] = None
+    merges: ClusterMerges
 
 
 
