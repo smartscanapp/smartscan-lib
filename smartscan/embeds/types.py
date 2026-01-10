@@ -10,9 +10,11 @@ FilterType = Union[Dict[str, Any], Callable[[Any], bool]]
 
 __all__ = [
     "ItemEmbedding",
+    "ItemEmbeddingUpdate",
     "GetResult",
     "QueryResult",
     "EncoderType",
+    "Include",
     "FilterType",
 ]
 
@@ -20,6 +22,13 @@ __all__ = [
 class ItemEmbedding(Generic[TData, TMetadata]):
     item_id: str
     embedding: ndarray
+    data: Optional[TData] = None
+    metadata: Optional[TMetadata] = None
+
+@dataclass
+class ItemEmbeddingUpdate(Generic[TData, TMetadata]):
+    item_id: str
+    embedding: Optional[ndarray] = None
     data: Optional[TData] = None
     metadata: Optional[TMetadata] = None
 
