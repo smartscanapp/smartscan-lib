@@ -1,11 +1,11 @@
 import numpy as np
 from smartscan.processor import BatchProcessor, ProcessorListener
-from smartscan.classify.types import ClassificationResult, LabelledCluster
+from smartscan.classify.types import ClassificationResult, Cluster
 from smartscan.embeds.types import ItemEmbedding
 
 class FewShotClassifier(BatchProcessor[ItemEmbedding, ClassificationResult]):
     def __init__(self, 
-                labelled_clusters: list[LabelledCluster],
+                labelled_clusters: list[Cluster],
                 listener: ProcessorListener[ItemEmbedding, ClassificationResult],
                 sim_factor: float = 1.0,
                 **kwargs
@@ -21,7 +21,7 @@ class FewShotClassifier(BatchProcessor[ItemEmbedding, ClassificationResult]):
         await self.listener.on_batch_complete(batch)
 
 
-def few_shot_classify(item: ItemEmbedding, labelled_clusters: list[LabelledCluster], sim_factor: float = 1.0) -> ClassificationResult:
+def few_shot_classify(item: ItemEmbedding, labelled_clusters: list[Cluster], sim_factor: float = 1.0) -> ClassificationResult:
         label = None
         best_sim = 0.0
         
