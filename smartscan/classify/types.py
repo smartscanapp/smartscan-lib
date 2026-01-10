@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from numpy import ndarray
-from typing import Optional, NewType, Dict, TypeAlias, List
+from typing import Optional, NewType, Dict, List
 from pydantic import Field, BaseModel
 
 __all__ = [
@@ -8,9 +8,7 @@ __all__ = [
     "ClusterAccuracy",
     "ClusterMetrics",
     "ClusterMetadata",
-    "BaseCluster",
-    "LabelledCluster",
-    "UnLabelledCluster",
+    "Cluster",
     "ItemId",
     "ClusterId",
     "Assignments",
@@ -25,8 +23,7 @@ class ClusterAccuracy:
     per_label: Dict[str, float]
     mean_accuracy: float
 
-@dataclass(frozen=True)
-class ClusterMetrics():
+class ClusterMetrics(BaseModel):
     prototype_size: int
     mean_similarity: float = 0
     min_similarity: float = 0
@@ -34,20 +31,17 @@ class ClusterMetrics():
     nearest_other_similarity: Optional[float] = None
     separation_margin: Optional[float] = None
 
-ClusterMetadata: TypeAlias = ClusterMetrics
+class ClusterMetadata(ClusterMetrics):
+    label: str
+
 
 @dataclass
-class BaseCluster:
+class Cluster:
+    UNLABELLED = "unlabelled"
     prototype_id: str
     embedding: ndarray
     metadata: ClusterMetadata
-    label: Optional[str] = None
-
-@dataclass
-class LabelledCluster(BaseCluster):
     label: str
-
-UnLabelledCluster: TypeAlias = BaseCluster
 
 ItemId = NewType("ItemId", str)
 ClusterId = NewType("ClusterId", str)
@@ -63,7 +57,7 @@ class ClassificationResult(BaseModel):
 
 @dataclass(frozen=True)
 class ClusterResult:
-    clusters:  Dict[ClusterId, BaseCluster]
+    clusters:  Dict[ClusterId, Cluster]
     assignments: Assignments
     merges: ClusterMerges
 
