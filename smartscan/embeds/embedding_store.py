@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import Generic, List, Optional
-from smartscan.embeds.types import TData, TMetadata , FilterType, ItemEmbedding, GetResult, QueryResult, Include
+from smartscan.embeds.types import TData, TMetadata , FilterType, ItemEmbedding, GetResult, QueryResult, Include, ItemEmbeddingUpdate
 import numpy as np
 
 
@@ -37,13 +37,8 @@ class EmbeddingStore(ABC, Generic[TData, TMetadata]):
         raise NotImplementedError
 
     @abstractmethod
-    def update(self, items: List[ItemEmbedding[TData, TMetadata]]) -> None:
+    def update(self, items: List[ItemEmbeddingUpdate[TData, TMetadata]]) -> None:
         """Update embeddings, data, or metadata using ItemEmbedding objects."""
-        raise NotImplementedError
-
-    @abstractmethod
-    def upsert(self, items: List[ItemEmbedding[TData, TMetadata]]) -> None:
-        """Update existing or insert new embeddings, data, or metadata."""
         raise NotImplementedError
 
     @abstractmethod
