@@ -5,9 +5,9 @@ import uuid
 from typing import Dict, List, Optional
 from smartscan.classify.helpers import merge_similar_clusters
 from smartscan.classify.types import (
-    BaseCluster,
+    Cluster,
     Assignments,
-    UnLabelledCluster,
+    Cluster,
     ClusterMetadata,
     ClusterResult,
 )
@@ -22,7 +22,7 @@ class IncrementalClusterer:
 
     def __init__(
         self,
-        existing_clusters: Dict[str, UnLabelledCluster] = {},
+        existing_clusters: Dict[str, Cluster] = {},
         default_threshold: float = 0.3,
         merge_threshold: Optional[float] = None,
         sim_factor: float = 1.0,
@@ -32,7 +32,7 @@ class IncrementalClusterer:
     ):
         self.default_threshold = default_threshold
         self.sim_factor = sim_factor
-        self.clusters: Dict[str, UnLabelledCluster] = existing_clusters
+        self.clusters: Dict[str, Cluster] = existing_clusters
         self.assignments: Assignments = {}
         self.min_cluster_size = min_cluster_size
         self.top_k = top_k
@@ -152,10 +152,11 @@ class IncrementalClusterer:
 
     def _set_and_assign(self, item_id: str, embedding: np.ndarray):
         prototype_id = self._generate_id()
-        cluster = UnLabelledCluster(
+        cluster = Cluster(
             prototype_id,
             embedding,
-            ClusterMetadata(prototype_size=1),
+            ClusterMetadata(prototype_size=1, label=Cluster.UNLABELLED),
+            label=Cluster.UNLABELLED
         )
         self.clusters[prototype_id] = cluster
         self.assignments[item_id] = prototype_id
@@ -164,7 +165,7 @@ class IncrementalClusterer:
         self,
         item_id: str,
         embedding: np.ndarray,
-        cluster: BaseCluster,
+        cluster: Cluster,
     ):
         new_embedding = update_prototype_embedding(
             cluster.embedding,
@@ -177,11 +178,12 @@ class IncrementalClusterer:
             np.stack([c.embedding for c in self.clusters.values() if c.prototype_id != cluster.prototype_id], axis=0),
         )
         metrics_tracker.add_samples(embedding)
-
-        updated = UnLabelledCluster(
+        metrics = metrics_tracker.get_metrics()
+        updated = Cluster(
             cluster.prototype_id,
             new_embedding,
-            metadata=metrics_tracker.get_metrics(),
+            metadata=ClusterMetadata(label=cluster.label, **metrics.model_dump()),
+            label=cluster.label
         )
 
         self.clusters[cluster.prototype_id] = updated

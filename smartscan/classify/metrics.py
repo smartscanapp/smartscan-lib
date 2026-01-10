@@ -1,10 +1,10 @@
 import numpy as np
 
 from typing import Optional, Dict
-from smartscan.classify.types import ClusterAccuracy, ClusterMetrics, Assignments, ItemId, ClusterId, BaseCluster
+from smartscan.classify.types import ClusterAccuracy, ClusterMetrics, Assignments, ItemId, ClusterId, Cluster
 
 class ClusterMetricTracker:
-    def __init__(self, cluster: BaseCluster, other_prototypes: Optional[np.ndarray] = None):
+    def __init__(self, cluster: Cluster, other_prototypes: Optional[np.ndarray] = None):
         self.cluster = cluster
         self.other_prototypes = other_prototypes
 
