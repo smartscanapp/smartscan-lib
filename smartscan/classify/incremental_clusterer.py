@@ -22,7 +22,8 @@ class IncrementalClusterer:
 
     def __init__(
         self,
-        existing_clusters: Dict[str, Cluster] = {},
+        existing_clusters: Optional[Dict[str, Cluster]] = None,
+        existing_assignments: Optional[Assignments] = None,
         default_threshold: float = 0.3,
         merge_threshold: Optional[float] = None,
         sim_factor: float = 1.0,
@@ -32,8 +33,8 @@ class IncrementalClusterer:
     ):
         self.default_threshold = default_threshold
         self.sim_factor = sim_factor
-        self.clusters: Dict[str, Cluster] = existing_clusters
-        self.assignments: Assignments = {}
+        self.clusters: Dict[str, Cluster] = existing_clusters or {}
+        self.assignments: Assignments = existing_assignments or {}
         self.min_cluster_size = min_cluster_size
         self.top_k = top_k
         self.max_batch_size = 10_000
@@ -172,6 +173,10 @@ class IncrementalClusterer:
             embedding,
             cluster.metadata.prototype_size,
         )
+        if item_id in self.assignments and self.assignments[item_id] == cluster.prototype_id:
+            # Stops the same assignments causing metrics update
+            # This helps prvent incorrect metrics calculations
+            return
 
         metrics_tracker = ClusterMetricTracker(
             cluster,
