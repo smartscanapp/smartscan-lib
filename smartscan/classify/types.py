@@ -16,6 +16,7 @@ __all__ = [
     "TargetClusters",
     "ClusterMerges",
     "ClusterResult"
+    "ClusterNoEmbeddings",
 ]
 
 @dataclass(frozen=True)
