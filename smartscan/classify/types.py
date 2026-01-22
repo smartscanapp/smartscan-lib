@@ -15,7 +15,7 @@ __all__ = [
     "MergeId",
     "TargetClusters",
     "ClusterMerges",
-    "ClusterResult"
+    "ClusterResult",
     "ClusterNoEmbeddings",
 ]
 
