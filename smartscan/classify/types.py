@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from numpy import ndarray
-from typing import Optional, NewType, Dict, List
+from typing import Optional, NewType, Dict, List, ClassVar
 from pydantic import Field, BaseModel
 
 __all__ = [
@@ -35,6 +35,12 @@ class ClusterMetadata(ClusterMetrics):
     label: str
 
 
+class ClusterNoEmbeddings(BaseModel):
+    UNLABELLED:ClassVar[str] = "unlabelled"
+    prototype_id: str
+    metadata: ClusterMetadata
+    label: str
+    
 @dataclass
 class Cluster:
     UNLABELLED = "unlabelled"
