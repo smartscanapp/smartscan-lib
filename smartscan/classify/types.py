@@ -27,7 +27,7 @@ class ClusterAccuracy:
 class ClusterMetrics(BaseModel):
     prototype_size: int
     mean_similarity: float = 0
-    nearest_other_similarity: Optional[float] = None
+    std_similarity: float = 0
 
 class ClusterMetadata(ClusterMetrics):
     label: str
