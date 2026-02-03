@@ -1,6 +1,6 @@
 # SmartScan Python Library
 
-Python library providing tools for ML inference, embeddings, indexing, semantic search, clustering, few-shot classification, and efficient batch processing. It powers the SmartScan Server used by the Desktop App.
+Python library providing tools for ML inference, embeddings, indexing, semantic search, clustering, few-shot classification, and efficient batch processing. This library powers the SmartScan Server used by the Desktop App.
 
 ---
 
@@ -24,8 +24,6 @@ Python library providing tools for ML inference, embeddings, indexing, semantic 
 ### Prerequisites
 
 * Python 3.10+
-
-Install directly from GitHub:
 
 ```bash
 pip install git+https://github.com/smartscanapp/smartscan-lib.git
@@ -80,7 +78,8 @@ text_embedder.embed_batch(["text1", "text2", "text3"])
 
 ## Indexing
 
-Indexers are implemented using the `BatchProcessor` abstraction. Default indexers are provided for common use cases.
+Indexers are implemented using the `BatchProcessor` abstraction. Default indexers are provided for common data types.
+All indexers optionally accept a `ProcessorListener` for progress and batch callbacks.
 
 ### Images
 
@@ -94,7 +93,10 @@ image_paths = [...]
 image_embedder = DinoSmallV2ImageEmbedder("path-to-dino-model")
 image_embedder.init()
 
-indexer = ImageIndexer(image_encoder=image_embedder)
+indexer = ImageIndexer(
+    image_encoder=image_embedder,
+    listener=listener  # optional
+)
 
 await indexer.run(image_urls)
 await indexer.run(image_paths)
@@ -112,7 +114,10 @@ video_paths = [...]
 image_embedder = DinoSmallV2ImageEmbedder("path-to-dino-model")
 image_embedder.init()
 
-indexer = VideoIndexer(image_encoder=image_embedder)
+indexer = VideoIndexer(
+    image_encoder=image_embedder,
+    listener=listener  # optional
+)
 
 await indexer.run(video_urls)
 await indexer.run(video_paths)
@@ -129,7 +134,10 @@ doc_paths = [...]
 text_embedder = MiniLmTextEmbedder("path-to-minilm-model", 512)
 text_embedder.init()
 
-indexer = DocIndexer(text_encoder=text_embedder)
+indexer = DocIndexer(
+    text_encoder=text_embedder,
+    listener=listener  # optional
+)
 
 await indexer.run(doc_paths)
 ```
@@ -157,9 +165,10 @@ result = clusterer.cluster(ids, embeddings)
 
 ## Few-Shot Classification
 
-Assigns a label to an embedding by comparing it against pre-labelled cluster centroids using similarity scoring.
+Assigns a label to an embedding by comparing it against pre-labelled cluster centroids.
+Supports batch processing and an optional `ProcessorListener`.
 
-### Example: single item
+### Single item
 
 ```python
 from smartscan.classify.fewshot import few_shot_classify
@@ -173,14 +182,14 @@ result = few_shot_classify(
 print(result.label, result.similarity)
 ```
 
-### Example: batch processing
+### Batch processing
 
 ```python
 from smartscan.classify.fewshot import FewShotClassifier
 
 classifier = FewShotClassifier(
     labelled_clusters=clusters,
-    listener=listener,
+    listener=listener,  # optional
     sim_factor=1.0,
     batch_size=32
 )
@@ -189,4 +198,3 @@ await classifier.run(item_embeddings)
 ```
 
 ---
-
