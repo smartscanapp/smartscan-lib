@@ -76,12 +76,12 @@ text_embedder.embed_batch(["text1", "text2", "text3"])
 
 ---
 
-## Indexing
+### Indexing
 
 Indexers are implemented using the `BatchProcessor` abstraction. Default indexers are provided for common data types.
 All indexers optionally accept a `ProcessorListener` for progress and batch callbacks.
 
-### Images
+#### Images
 
 ```python
 from smartscan.indexer import ImageIndexer
@@ -102,7 +102,7 @@ await indexer.run(image_urls)
 await indexer.run(image_paths)
 ```
 
-### Videos
+#### Videos
 
 ```python
 from smartscan.indexer import VideoIndexer
@@ -123,7 +123,7 @@ await indexer.run(video_urls)
 await indexer.run(video_paths)
 ```
 
-### Documents
+#### Documents
 
 ```python
 from smartscan.indexer import DocIndexer
@@ -144,7 +144,7 @@ await indexer.run(doc_paths)
 
 ---
 
-## Clustering
+### Clustering
 
 Incrementally groups embeddings into clusters based on similarity. Supports existing clusters, adaptive thresholds, and optional auto-merging.
 
@@ -163,12 +163,12 @@ result = clusterer.cluster(ids, embeddings)
 
 ---
 
-## Few-Shot Classification
+### Few-Shot Classification
 
 Assigns a label to an embedding by comparing it against pre-labelled cluster centroids.
 Supports batch processing and an optional `ProcessorListener`.
 
-### Single item
+#### Single item
 
 ```python
 from smartscan.classify.fewshot import few_shot_classify
@@ -182,7 +182,7 @@ result = few_shot_classify(
 print(result.label, result.similarity)
 ```
 
-### Batch processing
+#### Batch processing
 
 ```python
 from smartscan.classify.fewshot import FewShotClassifier
