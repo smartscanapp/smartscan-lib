@@ -1,4 +1,4 @@
-from smartscan.utils.models import ModelManager
+from smartscan.models.model_manager import ModelManager
 from pathlib import Path
 
 def test_model_manager():
@@ -17,3 +17,4 @@ def test_model_manager():
     exists = model_manager.model_exists('all-minilm-l6-v2')
     assert(exists == True)
     print(exists)
+    

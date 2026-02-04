@@ -3,11 +3,10 @@ import tempfile
 import urllib.request
 from pathlib import Path
 
-from smartscan import TextEmbeddingProvider, ImageEmbeddingProvider
-from smartscan.providers import  MiniLmTextEmbedder, ClipTextEmbedder, ClipImageEmbedder, DinoSmallV2ImageEmbedder
-from smartscan.types import LocalTextEmbeddingModel, LocalImageEmbeddingModel, ModelName
 from smartscan.errors import SmartScanError, ErrorCode
-from smartscan.constants import DEFAULT_MODEL_DIR, MODEL_REGISTRY, MINILM_MAX_TOKENS
+from smartscan.providers import  TextEmbeddingProvider, ImageEmbeddingProvider, MiniLmTextEmbedder, ClipTextEmbedder, ClipImageEmbedder, DinoSmallV2ImageEmbedder
+from smartscan.models.types import LocalTextEmbeddingModel, LocalImageEmbeddingModel, ModelName
+from smartscan.models.constants import DEFAULT_MODEL_DIR, MODEL_REGISTRY, MINILM_MAX_TOKENS
 
 class ModelManager:
     def __init__(self, root_dir: str = DEFAULT_MODEL_DIR):
