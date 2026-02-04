@@ -11,6 +11,8 @@ class ErrorCode(Enum):
     MODEL_NOT_LOADED = "MODEL_NOT_LOADED"
     INVALID_ARGUMENT = "INVALID_ARGUMENT"
     PROTOTYPE_GENERATION_ERROR = "PROTOTYPE_GENERATION_ERROR"
+    INVALID_MODEL_PATH = "INVALID_MODEL_PATH"
+    UNSUPPORTED_MODEL = "UNSUPPORTED_MODEL"
 
 class SmartScanError(Exception):
     """Base class for all SmartScan related errors."""
