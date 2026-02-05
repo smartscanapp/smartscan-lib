@@ -3,13 +3,9 @@ import random
 import uuid
 
 from typing import Dict, List, Optional
-from smartscan.classify.helpers import merge_similar_clusters
-from smartscan.classify.types import (
-    Cluster,
-    Assignments,
-    ClusterMetadata,
-    ClusterResult,
-)
+
+from smartscan.cluster.helpers import merge_similar_clusters
+from smartscan.cluster.types import Cluster, Assignments, ClusterMetadata, ClusterResult
 
 class IncrementalClusterer:
     def __init__(

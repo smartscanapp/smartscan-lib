@@ -1,0 +1,66 @@
+import numpy as np
+
+from typing import Dict
+from smartscan.cluster.types import Cluster, ClusterMerges,  ClusterAccuracy, Assignments, ItemId, ClusterId
+
+
+def merge_similar_clusters(cluster_prototypes: Dict[str, Cluster], merge_threshold: float = 0.9,verbose: bool = False) -> ClusterMerges:
+    cluster_merges: ClusterMerges = {}
+    cluster_ids = list(cluster_prototypes.keys())
+    cluster_embeds = [p.embedding for p in cluster_prototypes.values()]
+
+    for idx, emb in enumerate(cluster_embeds):
+        sims = np.dot(cluster_embeds, emb)
+        # Mask self-similarity
+        sims[idx] = 0.0
+        merge_indices = np.flatnonzero(sims > merge_threshold)
+
+        if merge_indices.size > 0:
+            cluster_merges[cluster_ids[idx]] = [cluster_ids[j] for j in merge_indices]
+            if verbose:
+                print(f"Cluster {cluster_ids[idx]} merges with: {[cluster_ids[j] for j in merge_indices]}")
+
+    return cluster_merges
+
+
+
+def calculate_cluster_accuracy(true_labels: Dict[ItemId, str], predicted_clusters: Assignments) -> ClusterAccuracy:
+    """
+    Compute per-cluster and overall accuracy given true labels and predicted clusters.
+
+    Args:
+        true_labels: Mapping from item ID to true label (e.g., "btc", "forex").
+        predicted_clusters: Mapping from item ID to predicted cluster ID.
+
+    Returns:
+        ClusterAccuracy
+    """
+    # Build contingency matrix
+    contingency: Dict[str, Dict[ClusterId, int]] = {}
+    for item, tlabel in true_labels.items():
+        pcluster = predicted_clusters.get(item)
+        if tlabel not in contingency:
+            contingency[tlabel] = {}
+        if pcluster is not None:
+            contingency[tlabel][pcluster] = contingency[tlabel].get(pcluster, 0) + 1
+
+    # Greedy matching for per-cluster accuracy
+    matched_pred = set()
+    per_cluster_acc: Dict[str, float] = {}
+    for tlabel, counts in contingency.items():
+        # Pick predicted cluster with largest overlap not already matched
+        best_p = max(
+            ((p, cnt) for p, cnt in counts.items() if p not in matched_pred),
+            key=lambda x: x[1],
+            default=(None, 0)
+        )[0]
+        matched_pred.add(best_p)
+        total = sum(counts.values())
+        correct = counts.get(best_p, 0)
+        per_cluster_acc[tlabel] = correct / total if total > 0 else 0.0
+
+    # Overall accuracy
+    total_correct = sum(int(sum(counts.values()) * per_cluster_acc[tlabel]) for tlabel, counts in contingency.items())
+    total_items = sum(sum(counts.values()) for counts in contingency.values())
+    overall_acc = total_correct / total_items if total_items > 0 else 0.0
+    return ClusterAccuracy(per_cluster_acc, overall_acc)
