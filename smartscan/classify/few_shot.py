@@ -1,6 +1,7 @@
 import numpy as np
 from smartscan.processor import BatchProcessor, ProcessorListener
-from smartscan.classify.types import ClassificationResult, Cluster
+from smartscan.classify.types import  ClassificationResult
+from smartscan.cluster.types import  Cluster
 from smartscan.embeds.types import ItemEmbedding
 
 class FewShotClassifier(BatchProcessor[ItemEmbedding, ClassificationResult]):
