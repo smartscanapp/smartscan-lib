@@ -12,20 +12,28 @@ from smartscan.cluster.types import Cluster, Assignments, ClusterMetadata, Clust
 class IncrementalClusterer:
     def __init__(
         self,
-        existing_clusters: Optional[dict[str, Cluster]] = None,
+        existing_clusters: Optional[dict[ClusterId, Cluster]] = None,
         default_threshold: float = 0.3,
         merge_threshold: Optional[float] = None,
         min_cluster_size: int = 2,
         top_k: int = 5,
+        ann_max_elements: int = 1_000_000,
+        ann_ef_construction: int = 200,
+        ann_max_neighbors: int = 16,
+        ann_ef_search: int = 50,
         benchmarking: bool = False,
         ):
-        self.clusters: dict[str, Cluster] = existing_clusters or {}
+        self.clusters: dict[ClusterId, Cluster] = existing_clusters or {}
         self.assignments: Assignments = {}
         self.default_threshold = default_threshold
         self.min_cluster_size = min_cluster_size
         self.top_k = top_k
         self.merge_threshold = merge_threshold
         self.benchmarking = benchmarking
+        self.ann_max_elements=ann_max_elements
+        self.ann_ef_construction = ann_ef_construction
+        self.ann_max_neighbors=ann_max_neighbors
+        self.ann_ef_search=ann_ef_search
         self._ann_index = None
         self._ann_initialized = False
         self._id_map: dict[int, str] = {}
@@ -90,11 +98,11 @@ class IncrementalClusterer:
     def _init_ann(self, dim: int) -> None:
         self._ann_index = hnswlib.Index(space="cosine", dim=dim)
         self._ann_index.init_index(
-            max_elements=1_000_000,
-            ef_construction=200,
-            M=16,
+            max_elements=self.ann_max_elements,
+            ef_construction=self.ann_ef_construction,
+            M=self.ann_max_neighbors,
         )
-        self._ann_index.set_ef(50)
+        self._ann_index.set_ef(self.ann_ef_search)
         self._ann_initialized = True
 
     def _add_to_ann(self, item_id: str, embedding: np.ndarray) -> None:
