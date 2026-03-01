@@ -15,9 +15,9 @@ dependencies = [
     "tokenizers>=0.22.1,<1.0.0",
     "requests>=2.31.0,<3.0.0",
     "psutil>=7.0.0, <8.0.0",
-    "pytest==9.0.2"
+    "pytest==9.0.2",
+    "hnswlib==0.8.0"
 ]
-
 
 [tool.setuptools.packages]
 find = {}
