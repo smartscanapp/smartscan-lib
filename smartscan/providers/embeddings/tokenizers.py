@@ -5,7 +5,7 @@ from tokenizers.processors import TemplateProcessing
 from tokenizers.normalizers import Sequence, NFD, Lowercase, StripAccents
 
 def load_minilm_tokenizer(vocab_path: str):
-    tokenizer = Tokenizer(WordPiece(vocab=vocab_path, unk_token="[UNK]"))
+    tokenizer = Tokenizer(WordPiece.from_file(vocab=vocab_path, unk_token="[UNK]"))
     tokenizer.normalizer = Sequence([NFD(), Lowercase(), StripAccents()])
     tokenizer.pre_tokenizer = Whitespace()
     tokenizer.post_processor = TemplateProcessing(
@@ -17,7 +17,7 @@ def load_minilm_tokenizer(vocab_path: str):
 
 
 def load_mpnet_tokenizer(vocab_path: str):
-    tokenizer = Tokenizer(WordPiece(vocab=vocab_path, unk_token="[UNK]"))
+    tokenizer = Tokenizer(WordPiece.from_file(vocab=vocab_path, unk_token="[UNK]"))
     tokenizer.normalizer = Sequence([NFD(), Lowercase(), StripAccents()])
     tokenizer.pre_tokenizer = Whitespace()
     tokenizer.post_processor = TemplateProcessing(
@@ -39,7 +39,7 @@ def load_roberta_tokenizer(vocab_path: str, merges_path: str):
     return tokenizer
 
 def load_clip_tokenizer(vocab_path: str, merges_path: str):
-    tokenizer = Tokenizer(BPE(vocab_path, merges_path))
+    tokenizer = Tokenizer(BPE.from_file(vocab_path, merges_path))
     tokenizer.pre_tokenizer = Whitespace()
     tokenizer.post_processor = TemplateProcessing(
         single="<start_of_text> $A <end_of_text>",
