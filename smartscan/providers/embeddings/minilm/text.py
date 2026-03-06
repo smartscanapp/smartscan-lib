@@ -1,21 +1,19 @@
 import numpy as np
-from importlib import resources
 from smartscan.providers import TextEmbeddingProvider
 from smartscan.models.onnx_model import OnnxModel
-from smartscan.providers.embeddings.minilm.tokenizer import load_minilm_tokenizer
+from smartscan.providers.embeddings.tokenizers import load_minilm_tokenizer
 from smartscan.errors import SmartScanError, ErrorCode
 
 
 class MiniLmTextEmbedder(TextEmbeddingProvider):
-    def __init__(self, model_path: str,  max_tokenizer_length: int):
+    def __init__(self, model_path: str,  max_tokenizer_length: int, vocab_path: str):
         self._model = OnnxModel(model_path)
-        self._embedding_dim = 384
         self._max_len = max_tokenizer_length
-        with resources.path("smartscan.providers.embeddings.minilm", "vocab.txt") as vocab_path:
-                self.tokenizer = load_minilm_tokenizer(str(vocab_path))
+        self.tokenizer = load_minilm_tokenizer(vocab_path)
+
     @property
     def embedding_dim(self) -> int:
-        return self._embedding_dim
+        return 384
     
     @property
     def max_tokenizer_length(self) -> int:
