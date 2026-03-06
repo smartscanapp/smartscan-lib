@@ -12,6 +12,7 @@ from smartscan.providers import (
     ClipTextEmbedder,
     ClipImageEmbedder,
     DinoSmallV2ImageEmbedder,
+    DistillRobertATextEmbedder
 )
 from smartscan.models.types import LocalTextEmbeddingModel, LocalImageEmbeddingModel, ModelName
 from smartscan.models.constants import DEFAULT_MODEL_DIR, MODEL_REGISTRY, MINILM_MAX_TOKENS
@@ -149,17 +150,45 @@ class ModelManager:
             if not self.model_exists(model):
                 print(f"{model} doesn't exsiting. Downloading model now...")
                 path = self.download_model(model)
-                return ClipTextEmbedder(path)
+                model_path = path / model_info['resource_files'][0]
+                vocab_path = path / model_info['resource_files'][1]
+                merges_path = path / model_info['resource_files'][2]
+                return ClipTextEmbedder(path, vocab_path, merges_path)
 
-            return ClipTextEmbedder(self.get_model_path(model))
+            model_path = path / model_info['resource_files'][0]
+            vocab_path = path / model_info['resource_files'][1]
+            merges_path = path / model_info['resource_files'][2]
+            return ClipTextEmbedder(path, vocab_path, merges_path)
 
         elif model == "all-minilm-l6-v2":
             if not self.model_exists(model):
                 print(f"{model} doesn't exsiting. Downloading model now...")
                 path = self.download_model(model)
-                return MiniLmTextEmbedder(path, MINILM_MAX_TOKENS)
+                model_info = MODEL_REGISTRY[model]
+                model_path = path / model_info['resource_files'][0]
+                vocab_path = path / model_info['resource_files'][1]
+                return MiniLmTextEmbedder(model_path, MINILM_MAX_TOKENS, vocab_path)
 
-            return MiniLmTextEmbedder(self.get_model_path(model), MINILM_MAX_TOKENS)
+            model_info = MODEL_REGISTRY[model]
+            model_path = path / model_info['resource_files'][0]
+            vocab_path = path / model_info['resource_files'][1]
+            return MiniLmTextEmbedder(model_path, MINILM_MAX_TOKENS, vocab_path)
+        
+        elif model == "all-distilroberta-v1":
+            if not self.model_exists(model):
+                print(f"{model} doesn't exsiting. Downloading model now...")
+                path = self.download_model(model)
+                model_info = MODEL_REGISTRY[model]
+                model_path = path / model_info['resource_files'][0]
+                vocab_path = path / model_info['resource_files'][1]
+                merges_path = path / model_info['resource_files'][2]
+                return DistillRobertATextEmbedder(model_path, MINILM_MAX_TOKENS, vocab_path, merges_path)
+
+            model_info = MODEL_REGISTRY[model]
+            model_path = path / model_info['resource_files'][0]
+            vocab_path = path / model_info['resource_files'][1]
+            merges_path = path / model_info['resource_files'][2]
+            return DistillRobertATextEmbedder(model_path, MINILM_MAX_TOKENS, vocab_path, merges_path)
 
         else:
             raise SmartScanError("Model not supported", code=ErrorCode.UNSUPPORTED_MODEL)
