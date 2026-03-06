@@ -16,13 +16,9 @@ dependencies = [
     "requests>=2.31.0,<3.0.0",
     "psutil>=7.0.0, <8.0.0",
     "pytest==9.0.2",
-    "hnswlib==0.8.0"
+    "hnswlib==0.8.0",
+    "pydantic>=2.12.5, <3.0.0"
 ]
 
 [tool.setuptools.packages]
 find = {}
-
-[tool.setuptools.package-data]
-"smartscan.providers.embeddings.clip" = ["vocab.json", "merges.txt"]
-"smartscan.providers.embeddings.minilm" = ["vocab.txt"]
-

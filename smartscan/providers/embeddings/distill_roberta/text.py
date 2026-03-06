@@ -1,19 +1,19 @@
 import numpy as np
 from smartscan.providers import TextEmbeddingProvider
 from smartscan.models.onnx_model import OnnxModel
-from smartscan.providers.embeddings.tokenizers import load_minilm_tokenizer
+from smartscan.providers.embeddings.tokenizers import load_roberta_tokenizer
 from smartscan.errors import SmartScanError, ErrorCode
 
 
-class MiniLmTextEmbedder(TextEmbeddingProvider):
-    def __init__(self, model_path: str,  max_tokenizer_length: int, vocab_path: str):
+class DistillRobertATextEmbedder(TextEmbeddingProvider):
+    def __init__(self, model_path: str,  max_tokenizer_length: int, vocab_path: str, merges_path: str):
         self._model = OnnxModel(model_path)
         self._max_len = max_tokenizer_length
-        self.tokenizer = load_minilm_tokenizer(vocab_path)
-
+        self.tokenizer = load_roberta_tokenizer(vocab_path, merges_path)
+        
     @property
     def embedding_dim(self) -> int:
-        return 384
+        return 768
     
     @property
     def max_tokenizer_length(self) -> int:
@@ -21,14 +21,14 @@ class MiniLmTextEmbedder(TextEmbeddingProvider):
         
     def embed(self, data: str) -> np.ndarray:
         if not self.is_initialized(): raise SmartScanError("Model not loaded", code=ErrorCode.MODEL_NOT_LOADED, details="Call init method first")
-        input_name = self._model.get_inputs()[0].name
+        input_names = self._model.get_inputs()
         token_ids = self._tokenize(data)
         attention_mask = [1 if id != 0 else 0 for id in token_ids]
         token_input = np.array([token_ids], dtype=np.int64)
         mask_input = np.array([attention_mask], dtype=np.int64)
 
         token_input = np.array([token_ids], dtype=np.int64)
-        outputs = self._model.run({input_name: token_input, "attention_mask": mask_input})
+        outputs = self._model.run({input_names[0].name: token_input, input_names[1].name: mask_input})
         embedding = outputs[0][0]
         embedding = embedding / np.linalg.norm(embedding)
         return embedding

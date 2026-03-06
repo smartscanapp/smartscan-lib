@@ -5,4 +5,5 @@ from smartscan.providers.embeddings.clip.image import ClipImageEmbedder
 from smartscan.providers.embeddings.clip.text import ClipTextEmbedder
 from smartscan.providers.embeddings.dino.image import DinoSmallV2ImageEmbedder
 from smartscan.providers.embeddings.minilm.text import MiniLmTextEmbedder
+from smartscan.providers.embeddings.distill_roberta.text import DistillRobertATextEmbedder
 from smartscan.providers.embeddings.inception_resnet.face import InceptionResnetFaceEmbedder
