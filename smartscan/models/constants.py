@@ -9,26 +9,29 @@ BASE_DIR = Path(os.environ.get("SMARTSCAN_BASE_DIR", LOCAL_BASE_DIR))
 DEFAULT_MODEL_DIR = os.path.join(BASE_DIR, "models")
 
 MINILM_MAX_TOKENS = 512
-MINILM_MODEL_PATH = 'minilm_sentence_transformer_quant.onnx'
-MINILM_MODEL_URL = "https://github.com/dev-diaries41/smartscan-models/releases/download/1.0.0/minilm_sentence_transformer_quant.onnx"
-
-CLIP_IMAGE_MODEL_URL = "https://github.com/dev-diaries41/smartscan-models/releases/download/1.0.0/clip_image_encoder_quant.onnx"
-CLIP_IMAGE_MODEL_PATH = "clip_image_encoder_quant.onnx"
-
-CLIP_TEXT_MODEL_URL = "https://github.com/dev-diaries41/smartscan-models/releases/download/1.0.0/clip_text_encoder_quant.onnx"
-CLIP_TEXT_MODEL_PATH = "clip_text_encoder_quant.onnx"
-
-DINO_SMALL_MODEL_URL = "https://github.com/dev-diaries41/smartscan-models/releases/download/1.0.0/dinov2_small_quant.onnx"
-DINO_SMALL_MODEL_PATH = "dinov2_small_quant.onnx"
-
-INCEPTION_RESNET_ZIP_URL = "https://github.com/dev-diaries41/smartscan-models/releases/download/1.0.0/facial_recognition_inception_resnet_v1.zip"
-INCEPTION_RESNET_ZIP_PATH = "inception_resnet_v1.zip"
-ULTRA_FACE_DETECTION_MODEL_PATH = "ultra_face_detector_model.onnx"
-INCEPTION_RESNET_MODEL_PATH = "inception_resnet_v1.onnx"
 
 MODEL_REGISTRY: Dict[ModelName, ModelInfo] = {
-    'all-minilm-l6-v2': ModelInfo(url=MINILM_MODEL_URL, path=MINILM_MODEL_PATH),
-    'clip-vit-b-32-image': ModelInfo(url=CLIP_IMAGE_MODEL_URL, path=CLIP_IMAGE_MODEL_PATH),
-    'clip-vit-b-32-text': ModelInfo(url=CLIP_TEXT_MODEL_URL, path=CLIP_TEXT_MODEL_PATH),
-    'dinov2-small': ModelInfo(url=DINO_SMALL_MODEL_URL, path=DINO_SMALL_MODEL_PATH),
+    'all-minilm-l6-v2': ModelInfo(
+        url="https://github.com/dev-diaries41/smartscan-models/releases/download/1.0.1/minilm_sentence_transformer_quant.zip", 
+        model_path='all_minilm_l6_v2',
+        resource_files=["minilm_sentence_transformer_quant.onnx", "vocab.txt"]
+        ),
+    'all-distilroberta-v1': ModelInfo(
+        url="https://github.com/dev-diaries41/smartscan-models/releases/download/1.0.1/all_distilroberta_v1_quant.zip", 
+        model_path='all_distilroberta_v1',
+        resource_files=["sentence-transformers_all-distilroberta-v1_quant.onnx", "vocab.json", "merges.txt"]
+        ),
+    'clip-vit-b-32-text': ModelInfo(
+        url="https://github.com/dev-diaries41/smartscan-models/releases/download/1.0.1/clip_text_encoder_quant.zip", 
+        model_path='clip_vit_b_32_text',
+        resource_files=["clip_text_encoder_quant.onnx", "vocab.json", "merges.txt"]
+        ),
+    'clip-vit-b-32-image': ModelInfo(
+        url="https://github.com/dev-diaries41/smartscan-models/releases/download/1.0.0/clip_image_encoder_quant.onnx", 
+        model_path="clip_image_encoder_quant.onnx"
+        ),
+    'dinov2-small': ModelInfo(
+        url="https://github.com/dev-diaries41/smartscan-models/releases/download/1.0.0/dinov2_small_quant.onnx", 
+        model_path="dinov2_small_quant.onnx"
+    ),
 }
