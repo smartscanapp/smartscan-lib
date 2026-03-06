@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "smartscan"
 version = "1.0.0"
-description = "SmartScan provides on-device ML pipelines with support for embeddings, ONNX models, indexing, classification, and efficient batch processing."
+description = "SmartScan provides on-device ML pipelines with support for embeddings, ONNX models, indexing, clustering, classification, and efficient batch processing."
 requires-python = ">=3.10"
 
 dependencies = [
