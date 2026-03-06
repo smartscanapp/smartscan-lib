@@ -17,4 +17,7 @@ def test_model_manager():
     exists = model_manager.model_exists('all-minilm-l6-v2')
     assert(exists == True)
     print(exists)
+
+    model = model_manager.get_text_embedder("all-minilm-l6-v2")
+    model.init()
     
