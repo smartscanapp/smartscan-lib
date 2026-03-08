@@ -47,7 +47,7 @@ def doc_source_to_text_chunks(source: str, tokenizer_max_length: int = 128, max_
     
     elif source.endswith(SupportedFileTypes.TEXT):
         raw_text = read_text_file(source)
-        chunks = chunk_text(source, tokenizer_max_length, max_chunks)
+        chunks = chunk_text(raw_text, tokenizer_max_length, max_chunks)
         return chunks
     else:
         raise SmartScanError("Unsupported file type", code=ErrorCode.UNSUPPORTED_FILE_TYPE, details=f"Supported file types: {SupportedFileTypes.TEXT}")
