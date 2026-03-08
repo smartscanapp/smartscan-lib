@@ -1,10 +1,10 @@
 import numpy as np
-import random
 import uuid
 import hnswlib
 
 from typing import Optional
 
+from smartscan.embeds.helpers import update_prototype_embedding
 from smartscan.cluster.helpers import merge_similar_clusters
 from smartscan.cluster.types import Cluster, Assignments, ClusterMetadata, ClusterResult, ClusterId
 
@@ -21,7 +21,6 @@ class IncrementalClusterer:
         ann_ef_construction: int = 200,
         ann_max_neighbors: int = 16,
         ann_ef_search: int = 50,
-        benchmarking: bool = False,
         ):
         self.clusters: dict[ClusterId, Cluster] = existing_clusters or {}
         self.assignments: Assignments = {}
@@ -29,7 +28,6 @@ class IncrementalClusterer:
         self.min_cluster_size = min_cluster_size
         self.top_k = top_k
         self.merge_threshold = merge_threshold
-        self.benchmarking = benchmarking
         self.ann_max_elements=ann_max_elements
         self.ann_ef_construction = ann_ef_construction
         self.ann_max_neighbors=ann_max_neighbors
@@ -67,13 +65,15 @@ class IncrementalClusterer:
 
             avg_cohesion, _ = self._compute_average_cluster_stats()
             threshold = self._get_threshold(self.clusters[best_cid], avg_cohesion, min_cluster_size)
-
+            
             if best_sim >= threshold:
-                self._update_and_assign(item_id, emb, self.clusters[best_cid])
+                self._update_and_assign(item_id, emb, best_cid)
             else:
                 # fallback to voting apporach for weaker/immature clusters
-                chosen_cluster = self._assign_by_votes(item_id, emb, avg_cohesion, min_cluster_size)
-                if chosen_cluster is None:
+                chosen_cid= self._assign_by_votes(emb, avg_cohesion, min_cluster_size)
+                if chosen_cid:
+                    self._update_and_assign(item_id, emb, chosen_cid)
+                else:
                     self._set_and_assign(item_id, emb)
 
             self._add_to_ann(item_id, emb)
@@ -119,56 +119,46 @@ class IncrementalClusterer:
         labels, _ = self._ann_index.knn_query(embedding, k=k)
         return [self._id_map[l] for l in labels[0] if l in self._id_map]
 
-
     def _get_threshold(self, cluster: Cluster, avg_cohesion: float,min_cluster_size: int) -> float:
         mean_sim = cluster.metadata.mean_similarity
         std_sim = cluster.metadata.std_similarity
         cluster_size = cluster.metadata.prototype_size
         size_factor = 1 - np.exp(-cluster.metadata.prototype_size)
-        baseline = (self.default_threshold + std_sim) * size_factor
+        baseline = (self.default_threshold) * size_factor
         if cluster_size < min_cluster_size or avg_cohesion <= 0:
             return baseline
         # prevents rejecting reasonable items or accepting poor matches too abruptly
         x = (mean_sim - avg_cohesion) / max(1e-6, avg_cohesion)
         alpha = 1.0 / (1.0 + np.exp(-x))
-        mean_candidate = mean_sim if mean_sim > baseline else baseline
-        base_candidate = alpha * mean_candidate + (1.0 - alpha) * baseline
-        return base_candidate
+        cohesion_score = mean_sim
+        adaptive_threshold = max(cohesion_score, baseline)
+        adaptive_threshold = alpha * adaptive_threshold + (1.0 - alpha) * baseline
+        return adaptive_threshold
 
-    def _set_and_assign(self, item_id: str, embedding: np.ndarray) -> Cluster:
+    def _set_and_assign(self, item_id: str, embedding: np.ndarray) -> None:
         prototype_id = self._generate_id()
         metadata = ClusterMetadata(prototype_size=1, mean_similarity=self.default_threshold, std_similarity=0.0, label=Cluster.UNLABELLED)
         cluster = Cluster(prototype_id, embedding, metadata, label=Cluster.UNLABELLED)
         self.clusters[prototype_id] = cluster
         self.assignments[item_id] = prototype_id
-        return cluster
 
-    def _update_and_assign(self, item_id: str, embedding: np.ndarray, cluster: Cluster) -> Cluster:
-        target_cid = cluster.prototype_id
+    def _update_and_assign(self, item_id: str, embedding: np.ndarray, cluster_id: ClusterId) -> None:
+        cluster = self.clusters[cluster_id]
         old_size = cluster.metadata.prototype_size
         old_meta = cluster.metadata
-        new_embedding = self._update_prototype_embedding(cluster.embedding, embedding, old_size)
+        new_embedding = update_prototype_embedding(cluster.embedding, embedding, old_size)
         sim_new = float(np.dot(new_embedding, embedding))
         new_mean = (old_meta.mean_similarity * old_size + sim_new) / (old_size + 1) if old_size >= 1 else sim_new
         new_std = (np.sqrt(((old_size - 1) * old_meta.std_similarity**2 + (sim_new - old_meta.mean_similarity) * (sim_new - new_mean)) / old_size)
                    if old_size > 1 else 0.0)
 
-        self.clusters[target_cid] = Cluster(
-            target_cid,
-            new_embedding,
-            metadata=ClusterMetadata(
-                prototype_size=old_size + 1,
-                mean_similarity=new_mean,
-                std_similarity=new_std,
-                label=cluster.label,
-            ),
-            label=cluster.label,
-        )
-        self.assignments[item_id] = target_cid
-        return cluster
-    
+        cluster.embedding = new_embedding
+        cluster.metadata.prototype_size = old_size + 1
+        cluster.metadata.mean_similarity = new_mean
+        cluster.metadata.std_similarity = new_std
+        self.assignments[item_id] = cluster_id
 
-    def _assign_by_votes(self, item_id: str, emb: np.ndarray, avg_cohesion: float, min_cluster_size: int) -> Optional[Cluster]:
+    def _assign_by_votes(self, emb: np.ndarray, avg_cohesion: float, min_cluster_size: int) -> Optional[ClusterId]:
         if not (self._ann_initialized and self._next_int_id > 0):
             return None
         nn_ids = self._query_ann(emb)
@@ -177,11 +167,14 @@ class IncrementalClusterer:
             return None
         voted_cid = self._select_top_cluster(vote_counts, vote_sims)
         voted_cluster = self.clusters[voted_cid]
+        n_votes = vote_counts[voted_cid]
+        required_votes = (self.top_k // 2)
+        if n_votes < required_votes:
+            return None
         sim_to_voted = float(np.dot(emb, voted_cluster.embedding))
         voted_threshold = self._get_threshold(voted_cluster, avg_cohesion, min_cluster_size)
-        # Relax threshold by std to allow highly similar items (identified by voting) to join existing cluster
-        if sim_to_voted >= (voted_threshold - voted_cluster.metadata.std_similarity):
-            return self._update_and_assign(item_id, emb, voted_cluster)
+        if sim_to_voted >= voted_threshold:
+            return voted_cid
         return None
 
     def _tally_votes(self, neighbour_ids: list[str], embedding: np.ndarray) -> tuple[dict[ClusterId, int], dict[ClusterId, list[float]]]:
@@ -204,7 +197,7 @@ class IncrementalClusterer:
         return max(top_cids, key=lambda cid: float(np.mean(vote_sims.get(cid, [0.0]))))
 
     def _generate_id(self) -> str:
-        return random.randbytes(8).hex() if self.benchmarking else uuid.uuid4().hex
+        return uuid.uuid4().hex
 
     def _compute_min_cluster_size(self, total_items: int) -> int:
         if total_items <= 0:
@@ -232,17 +225,3 @@ class IncrementalClusterer:
         for item_id, cid in singleton_items.items():
             del self.clusters[cid]
             self.assignments.pop(item_id, None)
-
-    @staticmethod
-    def _update_prototype_embedding(current_prototype: np.ndarray, batch_embeddings: np.ndarray, current_n: int, sign: int = 1) -> np.ndarray:
-        if sign not in (1, -1):
-            raise ValueError("sign must be 1 (add) or -1 (remove)")
-        batch_embeddings = np.asarray(batch_embeddings)
-        if batch_embeddings.ndim == 1:
-            batch_embeddings = batch_embeddings[np.newaxis, :]
-        batch_sum = np.sum(batch_embeddings, axis=0) * sign
-        updated_n = current_n + batch_embeddings.shape[0] * sign
-        if updated_n <= 0:
-            raise ValueError("Prototype count cannot be <= 0")
-        updated_prototype = (current_prototype * current_n + batch_sum) / updated_n
-        return updated_prototype / np.linalg.norm(updated_prototype)
