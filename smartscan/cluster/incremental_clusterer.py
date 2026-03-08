@@ -14,7 +14,6 @@ class IncrementalClusterer:
         self,
         existing_clusters: Optional[dict[ClusterId, Cluster]] = None,
         default_threshold: float = 0.3,
-        merge_threshold: Optional[float] = None,
         min_cluster_size: int = 2,
         top_k: int = 5,
         ann_max_elements: int = 1_000_000,
@@ -27,7 +26,6 @@ class IncrementalClusterer:
         self.default_threshold = default_threshold
         self.min_cluster_size = min_cluster_size
         self.top_k = top_k
-        self.merge_threshold = merge_threshold
         self.ann_max_elements=ann_max_elements
         self.ann_ef_construction = ann_ef_construction
         self.ann_max_neighbors=ann_max_neighbors
@@ -63,7 +61,7 @@ class IncrementalClusterer:
             best_cid = cluster_ids[best_idx]
             best_sim = cos_sims[best_idx]
 
-            avg_cohesion, _ = self._compute_average_cluster_stats()
+            avg_cohesion, _, _ = self._compute_average_cluster_stats()
             threshold = self._get_threshold(self.clusters[best_cid], avg_cohesion, min_cluster_size)
             
             if best_sim >= threshold:
@@ -80,10 +78,9 @@ class IncrementalClusterer:
 
         self._remove_singletons()
         
-        cluster_merges = None
-        if self.merge_threshold:
-            cluster_merges = merge_similar_clusters(self.clusters, self.merge_threshold)
-
+        avg_cohesion, _, avg_std = self._compute_average_cluster_stats()
+        merge_threshold = max(self.default_threshold, avg_cohesion - avg_std)
+        cluster_merges = merge_similar_clusters(self.clusters, merge_threshold)
         return ClusterResult(self.clusters, self.assignments, cluster_merges)
 
     def clear(self):
@@ -205,16 +202,18 @@ class IncrementalClusterer:
         adaptive = max(2, int(np.sqrt(total_items)))
         return max(adaptive, self.min_cluster_size)
 
-    def _compute_average_cluster_stats(self) -> tuple[float, float]:
-        cohesions, cluster_sizes = [], []
+    def _compute_average_cluster_stats(self) -> tuple[float, float, float]:
+        cohesions, cluster_sizes, stds = [], [], []
         for c in self.clusters.values():
             size = c.metadata.prototype_size
             cluster_sizes.append(size)
             if size > 1:
                 cohesions.append(c.metadata.mean_similarity)
+                stds.append(c.metadata.std_similarity)
         avg_cohesion = np.mean(cohesions) if cohesions else 0.0
         avg_cluster_size = np.mean(cluster_sizes) if cluster_sizes else 0.0
-        return avg_cohesion, avg_cluster_size
+        avg_std = np.mean(stds) if stds else 0.0
+        return avg_cohesion, avg_cluster_size, avg_std
     
     def _remove_singletons(self) -> None:
         singleton_items = {
