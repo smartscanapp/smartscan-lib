@@ -8,7 +8,6 @@ from smartscan.embeds.helpers import update_prototype_embedding
 from smartscan.cluster.helpers import merge_similar_clusters
 from smartscan.cluster.types import Cluster, Assignments, ClusterMetadata, ClusterResult, ClusterId
 
-
 class IncrementalClusterer:
     def __init__(
         self,
@@ -36,7 +35,6 @@ class IncrementalClusterer:
         self._rev_id_map: dict[str, int] = {}
         self._next_int_id = 0
 
-
     def cluster(self, ids: list[str], embeddings: list[np.ndarray]) -> ClusterResult:
         if not ids:
             return ClusterResult(self.clusters, self.assignments, None)
@@ -60,7 +58,6 @@ class IncrementalClusterer:
             best_idx = np.argmax(cos_sims)
             best_cid = cluster_ids[best_idx]
             best_sim = cos_sims[best_idx]
-
             avg_cohesion, _, _ = self._compute_average_cluster_stats()
             threshold = self._get_threshold(self.clusters[best_cid], avg_cohesion, min_cluster_size)
             
@@ -117,18 +114,14 @@ class IncrementalClusterer:
         return [self._id_map[l] for l in labels[0] if l in self._id_map]
 
     def _get_threshold(self, cluster: Cluster, avg_cohesion: float,min_cluster_size: int) -> float:
-        mean_sim = cluster.metadata.mean_similarity
-        std_sim = cluster.metadata.std_similarity
-        cluster_size = cluster.metadata.prototype_size
         size_factor = 1 - np.exp(-cluster.metadata.prototype_size)
-        baseline = (self.default_threshold) * size_factor
-        if cluster_size < min_cluster_size or avg_cohesion <= 0:
+        baseline = self.default_threshold * size_factor
+        if cluster.metadata.prototype_size < min_cluster_size or avg_cohesion <= 0:
             return baseline
         # prevents rejecting reasonable items or accepting poor matches too abruptly
-        x = (mean_sim - avg_cohesion) / max(1e-6, avg_cohesion)
+        x = (cluster.metadata.mean_similarity - avg_cohesion) / max(1e-6, avg_cohesion)
         alpha = 1.0 / (1.0 + np.exp(-x))
-        cohesion_score = mean_sim
-        adaptive_threshold = max(cohesion_score, baseline)
+        adaptive_threshold = max(cluster.metadata.mean_similarity - cluster.metadata.std_similarity, baseline)
         adaptive_threshold = alpha * adaptive_threshold + (1.0 - alpha) * baseline
         return adaptive_threshold
 
@@ -165,7 +158,7 @@ class IncrementalClusterer:
         voted_cid = self._select_top_cluster(vote_counts, vote_sims)
         voted_cluster = self.clusters[voted_cid]
         n_votes = vote_counts[voted_cid]
-        required_votes = (self.top_k // 2)
+        required_votes = self.top_k // 2
         if n_votes < required_votes:
             return None
         sim_to_voted = float(np.dot(emb, voted_cluster.embedding))
