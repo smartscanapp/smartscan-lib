@@ -16,6 +16,7 @@ Python library providing tools for ML inference, embeddings, indexing, semantic 
 
 * CLIP ViT-B-32
 * all-MiniLM-L6-v2
+* all-distilroberta-v1
 
 ---
 
@@ -38,12 +39,13 @@ pip install git+https://github.com/smartscanapp/smartscan-lib.git
 #### Embed images
 
 ```python
-from smartscan.providers import ClipImageEmbedder, DinoSmallV2ImageEmbedder
+from smartscan.models.model_manager import ModelManager
 from PIL import Image
 
-image_embedder = ClipImageEmbedder("path-to-clip-model")
+mm = ModelManager() # optionally pass root directory path for models
+image_embedder = mm.get_image_embedder("clip-vit-b-32-image")
 # or
-image_embedder = DinoSmallV2ImageEmbedder("path-to-dino-model")
+image_embedder = mm.get_image_embedder("dinov2-small")
 
 image_embedder.init()
 
@@ -57,17 +59,10 @@ image_embedder.embed_batch([
 #### Embed text
 
 ```python
-from smartscan.providers import ClipTextEmbedder, MiniLmTextEmbedder
+from smartscan.models.model_manager import ModelManager
+mm = ModelManager() # optionally pass root directory path for models
 
-text_embedder = ClipTextEmbedder("path-to-clip-model")
-text_embedder.init()
-
-text_embedder.embed("text to embed")
-text_embedder.embed_batch(["text1", "text2", "text3"])
-```
-
-```python
-text_embedder = MiniLmTextEmbedder("path-to-minilm-model", 512)
+text_embedder = mm.get_text_embedder("all-minilm-l6-v2")
 text_embedder.init()
 
 text_embedder.embed("text to embed")
@@ -85,12 +80,13 @@ All indexers optionally accept a `ProcessorListener` for progress and batch call
 
 ```python
 from smartscan.indexer import ImageIndexer
-from smartscan.providers import DinoSmallV2ImageEmbedder
+from smartscan.models.model_manager import ModelManager
 
 image_urls = [...]
 image_paths = [...]
 
-image_embedder = DinoSmallV2ImageEmbedder("path-to-dino-model")
+mm = ModelManager() 
+image_embedder = mm.get_image_embedder("dinov2-small")
 image_embedder.init()
 
 indexer = ImageIndexer(
@@ -111,7 +107,8 @@ from smartscan.providers import DinoSmallV2ImageEmbedder
 video_urls = [...]
 video_paths = [...]
 
-image_embedder = DinoSmallV2ImageEmbedder("path-to-dino-model")
+mm = ModelManager()
+image_embedder = mm.get_image_embedder("dinov2-small")
 image_embedder.init()
 
 indexer = VideoIndexer(
@@ -127,11 +124,12 @@ await indexer.run(video_paths)
 
 ```python
 from smartscan.indexer import DocIndexer
-from smartscan.providers import MiniLmTextEmbedder
+from smartscan.models.model_manager import ModelManager
 
 doc_paths = [...]
 
-text_embedder = MiniLmTextEmbedder("path-to-minilm-model", 512)
+mm = ModelManager()
+text_embedder = mm.get_text_embedder("all-minilm-l6-v2")
 text_embedder.init()
 
 indexer = DocIndexer(
