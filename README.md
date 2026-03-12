@@ -6,6 +6,8 @@ Python library providing tools for ML inference, embeddings, indexing, semantic 
 
 ## Supported Embedding Providers
 
+All of th models below are quantized.
+
 ### Image
 
 * CLIP ViT-B-32
