@@ -152,11 +152,12 @@ class ModelManager:
                 path = self.download_model(model)
             else:
                 path = self.get_model_path(model)
-
+            
+            model_info = MODEL_REGISTRY[model]
             model_path = path / model_info['resource_files'][0]
             vocab_path = path / model_info['resource_files'][1]
             merges_path = path / model_info['resource_files'][2]            
-            return ClipTextEmbedder(path, str(vocab_path), str(merges_path))
+            return ClipTextEmbedder(model_path, str(vocab_path), str(merges_path))
         
         elif model == "all-minilm-l6-v2":
             if not self.model_exists(model):
