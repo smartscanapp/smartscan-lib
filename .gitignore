@@ -7,3 +7,4 @@ db
 smartscan.json
 smartscan.egg-info
 build
+dev/
