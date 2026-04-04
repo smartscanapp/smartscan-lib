@@ -6,7 +6,7 @@ from smartscan.errors import SmartScanError, ErrorCode
 
 
 class MiniLmTextEmbedder(TextEmbeddingProvider):
-    def __init__(self, model_path: str,  max_tokenizer_length: int, vocab_path: str):
+    def __init__(self, model_path: str, vocab_path: str,  max_tokenizer_length: int = 512):
         self._model = OnnxModel(model_path)
         self._max_len = max_tokenizer_length
         self.tokenizer = load_minilm_tokenizer(vocab_path)
