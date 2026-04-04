@@ -1,4 +1,5 @@
 import shutil
+import os
 import tempfile
 import urllib.request
 import zipfile
@@ -15,8 +16,9 @@ from smartscan.providers import (
     DistillRobertATextEmbedder
 )
 from smartscan.models.types import LocalTextEmbeddingModel, LocalImageEmbeddingModel, ModelName
-from smartscan.models.constants import DEFAULT_MODEL_DIR, MODEL_REGISTRY, MINILM_MAX_TOKENS
+from smartscan.models.registry import BASE_DIR, MODEL_REGISTRY
 
+DEFAULT_MODEL_DIR = os.path.join(BASE_DIR, "models")
 
 class ModelManager:
     def __init__(self, root_dir: str = DEFAULT_MODEL_DIR):
@@ -169,7 +171,7 @@ class ModelManager:
             model_info = MODEL_REGISTRY[model]
             model_path = path / model_info['resource_files'][0]
             vocab_path = path / model_info['resource_files'][1]
-            return MiniLmTextEmbedder(model_path, MINILM_MAX_TOKENS, str(vocab_path))
+            return MiniLmTextEmbedder(model_path, str(vocab_path))
         
         elif model == "all-distilroberta-v1":
             if not self.model_exists(model):
@@ -182,7 +184,7 @@ class ModelManager:
             model_path = path / model_info['resource_files'][0]
             vocab_path = path / model_info['resource_files'][1]
             merges_path = path / model_info['resource_files'][2]
-            return DistillRobertATextEmbedder(model_path, MINILM_MAX_TOKENS, str(vocab_path), str(merges_path))
+            return DistillRobertATextEmbedder(model_path, str(vocab_path), str(merges_path))
         
         else:
             raise SmartScanError("Model not supported", code=ErrorCode.UNSUPPORTED_MODEL)
