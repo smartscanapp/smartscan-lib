@@ -16,7 +16,8 @@ from smartscan.providers import (
     DistillRobertATextEmbedder
 )
 from smartscan.models.types import LocalTextEmbeddingModel, LocalImageEmbeddingModel, ModelName
-from smartscan.models.registry import BASE_DIR, MODEL_REGISTRY
+from smartscan.constants import BASE_DIR
+from smartscan.models.registry import MODEL_REGISTRY
 
 DEFAULT_MODEL_DIR = os.path.join(BASE_DIR, "models")
 
