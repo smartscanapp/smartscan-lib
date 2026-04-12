@@ -1,3 +1,18 @@
+## v1.0.2 - 12/04/2026
+
+### Fixed
+* Fixed bug caused by incorrect model path being passed for clip text embedder
+
+### Added
+* Added model registry module ( move from constants)
+* Added model manager test
+
+### Changed
+* Assigned default values for max token length on relevant text embedder
+
+
+
+
 ## v1.0.1 - 08/03/2026
 
 ### Removed
