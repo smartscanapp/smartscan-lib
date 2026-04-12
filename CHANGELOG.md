@@ -11,8 +11,6 @@
 * Assigned default values for max token length on relevant text embedder
 
 
-
-
 ## v1.0.1 - 08/03/2026
 
 ### Removed
