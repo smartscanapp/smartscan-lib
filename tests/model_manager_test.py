@@ -1,23 +1,42 @@
+from smartscan import LocalImageEmbeddingModel, LocalTextEmbeddingModel
 from smartscan.models.model_manager import ModelManager
+
 from pathlib import Path
+from typing import get_args
 
-def test_model_manager():
-    model_manager = ModelManager()
-    exists = model_manager.model_exists('all-minilm-l6-v2')
-    model_manager.delete_model('all-minilm-l6-v2')
-    exists = model_manager.model_exists('all-minilm-l6-v2')
+class TestModelManager:
+    TEXT_MODELS = get_args(LocalTextEmbeddingModel)
+    IMAGE_MODELS = get_args(LocalImageEmbeddingModel)
 
-    assert(exists == False)
-    exists = model_manager.model_exists('all-minilm-l6-v2')
-    assert(exists == False)
+    def test_model_manager_all_text_embedders(self):
+        model_manager = ModelManager()
 
-    path = model_manager.download_model('all-minilm-l6-v2')
-    assert(isinstance(path, Path) == True)
-
-    exists = model_manager.model_exists('all-minilm-l6-v2')
-    assert(exists == True)
-    print(exists)
-
-    model = model_manager.get_text_embedder("all-minilm-l6-v2")
-    model.init()
+        for model_name in TestModelManager.TEXT_MODELS:
+            self._run_model_round_trip(model_manager, model_name, True)
     
+    def test_model_manager_all_image_embedders(self):
+        model_manager = ModelManager()
+
+        for model_name in TestModelManager.IMAGE_MODELS:
+            self._run_model_round_trip(model_manager, model_name, False)
+
+    @staticmethod
+    def _run_model_round_trip(model_manager: ModelManager, model_name: str, is_text_model: bool):
+        # Ensure model is removed
+        model_manager.delete_model(model_name)
+        assert model_manager.model_exists(model_name) is False
+
+        # Download model
+        path = model_manager.download_model(model_name)
+        assert isinstance(path, Path)
+
+        # Verify existence
+        assert model_manager.model_exists(model_name) is True
+
+        # Load and initialize
+        if is_text_model:
+            model = model_manager.get_text_embedder(model_name)
+        else:
+            model = model_manager.get_image_embedder(model_name)
+
+        model.init()

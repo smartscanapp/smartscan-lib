@@ -1,14 +1,5 @@
-import os
 from typing import Dict
-from smartscan.models.types import ModelName, ModelInfo
-from pathlib import Path
-
-
-LOCAL_BASE_DIR = Path.home() / ".cache" / "smartscan"
-BASE_DIR = Path(os.environ.get("SMARTSCAN_BASE_DIR", LOCAL_BASE_DIR))
-DEFAULT_MODEL_DIR = os.path.join(BASE_DIR, "models")
-
-MINILM_MAX_TOKENS = 512
+from smartscan.models.types import ModelInfo, ModelName
 
 MODEL_REGISTRY: Dict[ModelName, ModelInfo] = {
     'all-minilm-l6-v2': ModelInfo(
