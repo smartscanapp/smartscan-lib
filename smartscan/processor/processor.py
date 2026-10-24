@@ -13,7 +13,7 @@ from smartscan.processor.types import Input, Output
 
 class BatchProcessor(ABC, Generic[Input, Output]):
     def __init__(self,
-                 listener: None | ProcessorListener[Input, Output] = None,
+                 listener: None | ProcessorListener[Input] = None,
                  batch_size = 10, 
                  low_memory_threshold: int = 400,
                  high_memory_threshold: int = 1600,
@@ -36,7 +36,6 @@ class BatchProcessor(ABC, Generic[Input, Output]):
 
         try:
             if(len(items) <= 0):
-                print(f"No items to process")
                 result = MetricsSuccess()
                 if self.listener is not None:
                     await self.listener.on_complete(result)
@@ -89,9 +88,9 @@ class BatchProcessor(ABC, Generic[Input, Output]):
     # Doesnt need to be async becasue its wrapped in asyncio.to_thread
     @abstractmethod
     def on_process(self, item: Input) -> Output:
-        pass 
+        ...
 
     @abstractmethod
     async def on_batch_complete(self, batch: list[Output]):
-        pass 
+        ...
 
