@@ -84,7 +84,13 @@ class BatchProcessor(ABC, Generic[Input, Output]):
             if self.listener is not None:
                 await self.listener.on_fail(result)
             return result
-        
+
+    def register_listener(self, listener: ProcessorListener[Input]):
+        self.listener = listener
+
+    def remove_listener(self):
+        self.listener = None
+
     # Doesnt need to be async becasue its wrapped in asyncio.to_thread
     @abstractmethod
     def on_process(self, item: Input) -> Output:
