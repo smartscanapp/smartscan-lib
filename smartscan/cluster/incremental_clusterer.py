@@ -127,7 +127,7 @@ class IncrementalClusterer:
 
     def _set_and_assign(self, item_id: str, embedding: NDArray) -> None:
         prototype_id = self._generate_id()
-        metadata = ClusterMetadata(prototype_size=1, mean_similarity=self.default_threshold, std_similarity=0.0, label=Cluster.UNLABELLED)
+        metadata = ClusterMetadata(prototype_size=1, mean_similarity=self.default_threshold, std_similarity=0.0)
         cluster = Cluster(prototype_id, embedding, metadata)
         self.clusters[prototype_id] = cluster
         self.assignments[item_id] = prototype_id
