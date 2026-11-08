@@ -1,3 +1,18 @@
+## v1.1.2 - 08/11/2026
+
+### Added
+* Added register and remove listener methods to `BatchProcessor`
+
+### Changed
+* Allow null cluster labels
+
+### Removed
+* Removed FewShotClassifier BatchProcessor implementation
+* Removed Output from ProcessorListener
+
+___
+
+
 ## v1.1.1 - 07/09/2026
 
 ### Removed

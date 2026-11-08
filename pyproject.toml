@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "smartscan"
-version = "1.1.1"
+version = "1.1.2"
 description = "SmartScan provides efficient tools for intelligent machine learning and data processing."
 requires-python = ">=3.10"
 

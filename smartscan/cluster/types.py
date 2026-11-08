@@ -27,13 +27,12 @@ ClusterMerges = Dict[MergeId, TargetClusters]
 @dataclass
 class ClusterMetadata:
     prototype_size: int
-    label: str
+    label: str | None = None
     mean_similarity: float = 0
     std_similarity: float = 0
 
 @dataclass
 class Cluster:
-    UNLABELLED = "unlabelled"
     prototype_id: str
     embedding: ndarray
     metadata: ClusterMetadata
