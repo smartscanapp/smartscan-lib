@@ -21,7 +21,7 @@ class IncrementalClusterer:
         ann_max_neighbors: int = 16,
         ann_ef_search: int = 50,
         ):
-        self.clusters: dict[ClusterId, Cluster] = existing_clusters or {}
+        self.clusters: dict[ClusterId, Cluster] = dict(existing_clusters) if existing_clusters else {}        
         self.assignments: Assignments = {}
         self.default_threshold = default_threshold
         self.min_cluster_size = min_cluster_size
