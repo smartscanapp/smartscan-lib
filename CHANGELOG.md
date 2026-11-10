@@ -1,3 +1,13 @@
+## v1.1.3 - 10/11/2026
+
+### Added
+* Added `clear` method to EmbeddingStore
+
+### Fixed
+* Fixed mutation of existing clusters during incremental clustering by copying the cluster dictionary.
+
+___
+
 ## v1.1.2 - 08/11/2026
 
 ### Added
